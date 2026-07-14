@@ -164,7 +164,6 @@
 <div id="toast" class="toast"></div>
 <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 
-<!-- LOGIN -->
 <div id="loginPage">
   <div class="login-box">
     <h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1>
@@ -219,7 +218,7 @@
         <div class="social-links-grid" id="socialLinksGrid"></div>
       </section>
       <section class="page" id="page-chatgeral">
-        <div class="page-header"><h2>💬 Chat Geral</h2><p>Converse com todos</p></div>
+        <div class="page-header"><h2>💬 Chat Geral</h2></div>
         <div class="content-card chat-geral-container">
           <div class="chat-geral-messages" id="chatGeralMessages"></div>
           <div class="chat-geral-input-area"><input type="text" id="chatGeralInput" placeholder="Digite..." onkeydown="if(event.key==='Enter') sendChatGeral()" /><button onclick="sendChatGeral()"><i class="fas fa-paper-plane"></i></button></div>
@@ -274,6 +273,17 @@
   function toast(msg, type = '') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function esc(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
+  // ========== PEGAR IP REAL ==========
+  async function getIP() {
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      const d = await r.json();
+      return d.ip;
+    } catch {
+      return 'Desconhecido';
+    }
+  }
+
   function showRegister() {
     const box = document.querySelector('.login-box');
     box.innerHTML = `<h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1><p class="sub">Criar Conta</p><form id="registerForm"><div class="error-msg" id="regError"></div><input type="text" id="regUser" placeholder="Usuário" required /><input type="password" id="regPass" placeholder="Senha" required /><input type="url" id="regWebhook" placeholder="Webhook do Discord" required /><div class="field-hint">📬 URL do webhook do Discord</div><button type="submit" class="btn-primary">Cadastrar</button></form><div class="toggle-link">Já tem conta? <span onclick="showLogin()">Faça login</span></div>`;
@@ -286,7 +296,8 @@
       if (!w.startsWith('https://discord.com/api/webhooks/')) { document.getElementById('regError').textContent = 'Só webhook do Discord!'; return; }
       const { data: exist } = await sb.from('usuarios').select('*').eq('username', u);
       if (exist?.length) { document.getElementById('regError').textContent = 'Usuário já existe!'; return; }
-      await sb.from('usuarios').insert({ username: u, password: p, role: 'user', banned: false, ip: '', webhook: w, loginAttempts: 0, lockedUntil: 0 });
+      const ip = await getIP();
+      await sb.from('usuarios').insert({ username: u, password: p, role: 'user', banned: false, ip, webhook: w, loginAttempts: 0, lockedUntil: 0 });
       await carregarDados();
       toast('Conta criada! Faça login.');
       showLogin();
@@ -322,8 +333,7 @@
       user.loginAttempts = (user.loginAttempts || 0) + 1;
       const remaining = 3 - user.loginAttempts;
       if (user.loginAttempts >= 3) {
-        user.lockedUntil = now + 300000;
-        user.loginAttempts = 0;
+        user.lockedUntil = now + 300000; user.loginAttempts = 0;
         await sb.from('usuarios').update({ loginAttempts: 0, lockedUntil: now + 300000 }).eq('id', user.id);
         document.getElementById('loginError').textContent = '❌ Bloqueado por 5 minutos!';
         document.getElementById('lockInfo').textContent = '🔒 Tente mais tarde';
@@ -334,8 +344,11 @@
       document.getElementById('attemptsInfo').textContent = `⚠️ ${remaining} tentativa(s)`;
       return;
     }
-    await sb.from('usuarios').update({ loginAttempts: 0, lockedUntil: 0, ip: '127.0.0.1' }).eq('id', user.id);
+    // Login OK - pega IP real
+    const ipReal = await getIP();
+    await sb.from('usuarios').update({ loginAttempts: 0, lockedUntil: 0, ip: ipReal }).eq('id', user.id);
     currentUser = user;
+    currentUser.ip = ipReal;
     enterApp();
   }
   document.getElementById('loginForm').addEventListener('submit', loginHandler);
@@ -420,7 +433,7 @@
     }).join('');
   }
 
-  // ========== COFRE ==========
+  // COFRE
   async function addAccount() {
     const n = document.getElementById('accNome').value.trim();
     const u = document.getElementById('accUsuario').value.trim();
@@ -433,58 +446,28 @@
     document.getElementById('accNome').value = ''; document.getElementById('accUsuario').value = ''; document.getElementById('accSenha').value = ''; document.getElementById('accCookie').value = ''; document.getElementById('accAuth').value = '';
     toast('Conta adicionada! ✅');
   }
-  async function deleteAccount(id) {
-    if (currentUser.role !== 'admin') { toast('Só admin!', 'error'); return; }
-    await sb.from('contas').delete().eq('id', id);
-    await renderCofre(); await renderAdminAccounts(); await updateStats(); toast('Removida!');
-  }
-
-  // ========== RENDER COFRE (CORRIGIDO) ==========
+  async function deleteAccount(id) { if (currentUser.role !== 'admin') { toast('Só admin!', 'error'); return; } await sb.from('contas').delete().eq('id', id); await renderCofre(); await renderAdminAccounts(); await updateStats(); toast('Removida!'); }
   async function renderCofre() {
-    const tb = document.getElementById('cofreTable');
-    const accs = await getAccounts();
+    const tb = document.getElementById('cofreTable'); const accs = await getAccounts();
     if (currentUser.role === 'admin') {
       document.getElementById('cofreTitle').textContent = '📋 Todas (Admin)';
       if (!accs.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>'; return; }
-      tb.innerHTML = accs.map(a => `
-        <tr>
-          <td><span class="badge badge-user">${esc(a.createdBy)}</span></td>
-          <td><strong>${esc(a.nome)}</strong></td>
-          <td>${esc(a.usuario)}</td>
-          <td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td>
-          <td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td>
-          <td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td>
-          <td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td>
-        </tr>
-      `).join('');
+      tb.innerHTML = accs.map(a => `<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td><td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
     } else {
       document.getElementById('cofreTitle').textContent = '📋 Minhas Contas';
       const minhas = accs.filter(a => a.createdBy === currentUser.username);
       if (!minhas.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Nenhuma sua ainda 🔐</td></tr>'; return; }
-      tb.innerHTML = minhas.map(a => `
-        <tr>
-          <td><span class="badge badge-user">você</span></td>
-          <td><strong>${esc(a.nome)}</strong></td>
-          <td>${esc(a.usuario)}</td>
-          <td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td>
-          <td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td>
-          <td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td>
-          <td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td>
-        </tr>
-      `).join('');
+      tb.innerHTML = minhas.map(a => `<tr><td><span class="badge badge-user">você</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td><td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
     }
   }
-
   function copyText(txt) { navigator.clipboard.writeText(txt).then(() => toast('Copiado! ✅')); }
 
   // CONTEÚDO
   let editingContent = { type: null, id: null };
   async function saveContentItem(type) {
     const pm = { metodos: 'met', paineis: 'pain', tutoriais: 'tut' }; const p = pm[type];
-    const titulo = document.getElementById(p + 'Titulo').value.trim();
-    const desc = document.getElementById(p + 'Desc').value.trim();
-    const link = document.getElementById(p + 'Link').value.trim();
-    const img = document.getElementById(p + 'Img').value.trim();
+    const titulo = document.getElementById(p + 'Titulo').value.trim(); const desc = document.getElementById(p + 'Desc').value.trim();
+    const link = document.getElementById(p + 'Link').value.trim(); const img = document.getElementById(p + 'Img').value.trim();
     if (!titulo || !desc) { toast('Preencha título e descrição!', 'error'); return; }
     if (editingContent.type === type && editingContent.id) { await sb.from('conteudo').update({ titulo, descricao: desc, link, img }).eq('id', editingContent.id); editingContent = { type: null, id: null }; document.querySelector(`#${type}Form button`).textContent = 'Adicionar'; toast('Atualizado! ✅'); }
     else { await sb.from('conteudo').insert({ tipo: type, titulo, descricao: desc, link, img, createdBy: currentUser.username }); toast('Adicionado! ✅'); }
@@ -499,29 +482,13 @@
 
   // ADMIN
   async function renderAdmin() {
-    const tb = document.getElementById('adminTable');
-    await carregarDados();
-    const accs = await getAccounts();
+    const tb = document.getElementById('adminTable'); await carregarDados(); const accs = await getAccounts();
     const search = (document.getElementById('userSearch').value || '').toLowerCase();
     const filtered = users.filter(u => u.username.toLowerCase().includes(search));
     tb.innerHTML = filtered.map(u => { const qtd = accs.filter(a => a.createdBy === u.username).length; return `<tr style="${u.banned ? 'opacity:0.5;' : ''}"><td><strong>${esc(u.username)}</strong></td><td><span class="val-full">${esc(u.password)}</span> <button class="copy-btn" onclick="copyText('${esc(u.password).replace(/'/g, "\\'")}')">📋</button></td><td>${u.webhook ? `<span class="val-full" style="max-width:180px;">${esc(u.webhook)}</span> <button class="copy-btn" onclick="copyText('${esc(u.webhook).replace(/'/g, "\\'")}')">📋</button>` : '<span style="color:#666;">—</span>'}</td><td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td><td><span class="badge ${u.banned ? 'badge-banned' : 'badge-active'}">${u.banned ? '❌ Banido' : '✅ Ativo'}</span></td><td><span class="mono">${u.ip || '-'}</span></td><td>${qtd}</td><td><div class="actions">${u.username !== 'rimuro' ? `${u.banned ? `<button class="btn-success btn-sm" onclick="unbanUser('${u.username}')"><i class="fas fa-check"></i></button>` : `<button class="btn-warning btn-sm" onclick="banUser('${u.username}')"><i class="fas fa-ban"></i></button>`}<button class="btn-danger btn-sm" onclick="deleteUser('${u.username}')"><i class="fas fa-trash"></i></button>` : '<span style="color:#888;">—</span>'}</div></td></tr>`; }).join('');
     if (!filtered.length) tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;padding:32px;">Nenhum 🔍</td></tr>';
   }
-  async function renderAdminAccounts() {
-    const tb = document.getElementById('adminAccountsTable'); const accs = await getAccounts();
-    if (!accs.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>'; return; }
-    tb.innerHTML = accs.map(a => `
-      <tr>
-        <td><span class="badge badge-user">${esc(a.createdBy)}</span></td>
-        <td><strong>${esc(a.nome)}</strong></td>
-        <td>${esc(a.usuario)}</td>
-        <td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td>
-        <td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td>
-        <td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td>
-        <td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td>
-      </tr>
-    `).join('');
-  }
+  async function renderAdminAccounts() { const tb = document.getElementById('adminAccountsTable'); const accs = await getAccounts(); if (!accs.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>'; return; } tb.innerHTML = accs.map(a => `<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td><td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
   async function banUser(u) { await sb.from('usuarios').update({ banned: true }).eq('username', u); await renderAdmin(); toast(`${u} banido!`); }
   async function unbanUser(u) { await sb.from('usuarios').update({ banned: false }).eq('username', u); await renderAdmin(); toast(`${u} desbanido!`); }
   async function deleteUser(u) { if (!confirm(`Deletar ${u}?`)) return; await sb.from('usuarios').delete().eq('username', u); await renderAdmin(); await updateStats(); toast(`${u} removido!`); }
@@ -530,34 +497,20 @@
   // CHAT GERAL
   async function sendChatGeral() {
     const input = document.getElementById('chatGeralInput'); const text = input.value.trim();
-    if (!text) return;
-    if (currentUser.role !== 'admin' && chatCooldown) { toast('Aguarde 4s!', 'error'); return; }
+    if (!text) return; if (currentUser.role !== 'admin' && chatCooldown) { toast('Aguarde 4s!', 'error'); return; }
     await sb.from('chat_geral').insert({ user: currentUser.username, text, time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), role: currentUser.role });
     input.value = ''; await renderChatGeral(); await updateStats();
-    if (currentUser.role !== 'admin') {
-      chatCooldown = true;
-      const cdDiv = document.getElementById('chatGeralCooldown');
-      cdDiv.style.display = 'block';
-      let sec = 4; const fill = document.getElementById('cooldownFill'); const secSpan = document.getElementById('cooldownSec');
-      fill.style.width = '100%';
-      const interval = setInterval(() => { sec--; secSpan.textContent = sec; fill.style.width = (sec / 4) * 100 + '%'; if (sec <= 0) { clearInterval(interval); cdDiv.style.display = 'none'; chatCooldown = false; } }, 1000);
-    }
+    if (currentUser.role !== 'admin') { chatCooldown = true; const cd = document.getElementById('chatGeralCooldown'); cd.style.display = 'block'; let sec = 4; const f = document.getElementById('cooldownFill'); const s = document.getElementById('cooldownSec'); f.style.width = '100%'; const iv = setInterval(() => { sec--; s.textContent = sec; f.style.width = (sec/4)*100+'%'; if (sec<=0) { clearInterval(iv); cd.style.display='none'; chatCooldown=false; } }, 1000); }
   }
   async function deleteChatGeralMsg(id) { if (currentUser.role !== 'admin') { toast('Só admin!', 'error'); return; } if (!confirm('Deletar?')) return; await sb.from('chat_geral').delete().eq('id', id); await renderChatGeral(); await updateStats(); toast('Deletada!'); }
-  async function renderChatGeral() {
-    const container = document.getElementById('chatGeralMessages');
-    const msgs = await getChatGeral();
-    if (!msgs.length) { container.innerHTML = '<div class="chat-empty">💬 Nenhuma mensagem ainda</div>'; return; }
-    container.innerHTML = msgs.map(m => { const isSelf = m.user === currentUser?.username; const delBtn = currentUser?.role === 'admin' ? `<button class="btn-danger btn-xs" onclick="deleteChatGeralMsg(${m.id})"><i class="fas fa-trash"></i></button>` : ''; return `<div class="chat-geral-msg ${isSelf ? 'self' : 'other'}"><div class="msg-user ${m.role === 'admin' ? 'admin' : ''}">${isSelf ? 'Você' : esc(m.user)} ${m.role === 'admin' ? '👑' : ''}</div><div>${esc(m.text)}</div><div class="msg-actions"><span class="msg-time">${m.time}</span>${delBtn}</div></div>`; }).join('');
-    container.scrollTop = container.scrollHeight;
-  }
+  async function renderChatGeral() { const c = document.getElementById('chatGeralMessages'); const msgs = await getChatGeral(); if (!msgs.length) { c.innerHTML = '<div class="chat-empty">💬 Nenhuma mensagem ainda</div>'; return; } c.innerHTML = msgs.map(m => { const isSelf = m.user === currentUser?.username; const del = currentUser?.role === 'admin' ? `<button class="btn-danger btn-xs" onclick="deleteChatGeralMsg(${m.id})"><i class="fas fa-trash"></i></button>` : ''; return `<div class="chat-geral-msg ${isSelf?'self':'other'}"><div class="msg-user ${m.role==='admin'?'admin':''}">${isSelf?'Você':esc(m.user)} ${m.role==='admin'?'👑':''}</div><div>${esc(m.text)}</div><div class="msg-actions"><span class="msg-time">${m.time}</span>${del}</div></div>`; }).join(''); c.scrollTop = c.scrollHeight; }
 
   // CHAT ADMIN
   let chatOpen = false;
   function toggleChat() { chatOpen = !chatOpen; document.getElementById('chatWidget').classList.toggle('open', chatOpen); if (chatOpen) { document.getElementById('chatBadge').style.display = 'none'; renderChatMessages(); setTimeout(() => { const m = document.getElementById('chatMessages'); m.scrollTop = m.scrollHeight; }, 100); } }
   async function sendChatMsg() { const input = document.getElementById('chatInput'); const text = input.value.trim(); if (!text) return; await sb.from('chat_admin').insert({ user: currentUser.username, text, time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }); input.value = ''; if (chatOpen) { await renderChatMessages(); const m = document.getElementById('chatMessages'); setTimeout(() => { m.scrollTop = m.scrollHeight; }, 50); } else updateChatBadge(); }
-  async function renderChatMessages() { const container = document.getElementById('chatMessages'); const msgs = await getChatMessages(); if (!msgs.length) { container.innerHTML = '<div class="chat-empty">💬 Vazio</div>'; return; } container.innerHTML = msgs.map(m => { const isSelf = m.user === currentUser?.username; return `<div class="chat-msg ${isSelf ? 'self' : 'other'}"><div class="msg-user">${isSelf ? 'Você' : esc(m.user)}</div><div>${esc(m.text)}</div><div class="msg-time">${m.time}</div></div>`; }).join(''); }
-  function updateChatBadge() { const badge = document.getElementById('chatBadge'); const msgs = JSON.parse(localStorage.getItem('rimuro_chat') || '[]'); badge.textContent = msgs.length; badge.style.display = msgs.length > 0 ? 'flex' : 'none'; }
+  async function renderChatMessages() { const c = document.getElementById('chatMessages'); const msgs = await getChatMessages(); if (!msgs.length) { c.innerHTML = '<div class="chat-empty">💬 Vazio</div>'; return; } c.innerHTML = msgs.map(m => { const isSelf = m.user === currentUser?.username; return `<div class="chat-msg ${isSelf?'self':'other'}"><div class="msg-user">${isSelf?'Você':esc(m.user)}</div><div>${esc(m.text)}</div><div class="msg-time">${m.time}</div></div>`; }).join(''); }
+  function updateChatBadge() { const b = document.getElementById('chatBadge'); const msgs = JSON.parse(localStorage.getItem('rimuro_chat')||'[]'); b.textContent = msgs.length; b.style.display = msgs.length > 0 ? 'flex' : 'none'; }
 
   carregarDados();
 </script>
