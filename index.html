@@ -273,15 +273,24 @@
   function toast(msg, type = '') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function esc(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
-  // ========== PEGAR IP REAL ==========
+  // ========== PEGAR IP REAL (5 APIs de fallback) ==========
   async function getIP() {
-    try {
-      const r = await fetch('https://api.ipify.org?format=json');
-      const d = await r.json();
-      return d.ip;
-    } catch {
-      return 'Desconhecido';
+    const apis = [
+      'https://api.ipify.org?format=json',
+      'https://ip-api.com/json/?fields=query',
+      'https://api.country.is/',
+      'https://httpbin.org/ip',
+      'https://ipwho.is/'
+    ];
+    for (const url of apis) {
+      try {
+        const r = await fetch(url, { cache: 'no-store' });
+        const d = await r.json();
+        const ip = d.ip || d.query || d.ip_address;
+        if (ip) return ip;
+      } catch {}
     }
+    return 'Desconhecido';
   }
 
   function showRegister() {
@@ -344,7 +353,6 @@
       document.getElementById('attemptsInfo').textContent = `⚠️ ${remaining} tentativa(s)`;
       return;
     }
-    // Login OK - pega IP real
     const ipReal = await getIP();
     await sb.from('usuarios').update({ loginAttempts: 0, lockedUntil: 0, ip: ipReal }).eq('id', user.id);
     currentUser = user;
