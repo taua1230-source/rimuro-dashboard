@@ -39,9 +39,15 @@
     .login-box .lock-info { color: #ef4444; font-size: 12px; text-align: center; font-weight: 600; }
     #app { display: none; }
     .app-layout { display: flex; min-height: 100vh; }
-    .sidebar { width: 250px; background: #0f0f17; border-right: 1px solid #1f1f2f; padding: 24px 16px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; transition: transform 0.3s; }
-    .sidebar-logo { font-size: 22px; font-weight: 800; margin-bottom: 32px; display: flex; align-items: center; gap: 10px; }
+
+    /* Sidebar */
+    .sidebar { width: 250px; background: #0f0f17; border-right: 1px solid #1f1f2f; padding: 24px 16px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; transition: transform 0.3s ease; }
+    .sidebar.closed { transform: translateX(-250px); }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .sidebar-logo { font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
     .sidebar-logo .logo-img { width: 32px; height: 32px; border-radius: 8px; }
+    .sidebar-close { background: transparent; border: none; color: #888; font-size: 20px; padding: 8px; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
+    .sidebar-close:hover { background: #1a1a2a; color: #fff; }
     .sidebar nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
     .sidebar nav a { padding: 12px 14px; border-radius: 10px; color: #a0a0b0; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
     .sidebar nav a:hover { background: #1a1a2a; color: #fff; }
@@ -52,7 +58,20 @@
     .sidebar .user-info .role { color: #a855f7; font-size: 12px; }
     .btn-logout { margin-top: 8px; background: transparent; border: 1px solid #2a2a3a; color: #ef4444; width: 100%; font-size: 13px; }
     .btn-logout:hover { background: #ef444422; }
-    .main-content { margin-left: 250px; flex: 1; padding: 32px; }
+
+    /* Hamburger button when sidebar is closed */
+    .hamburger-open {
+      position: fixed; top: 16px; left: 16px; z-index: 45;
+      background: #1a1a24; border: 1px solid #2a2a3a; color: #fff;
+      padding: 10px 14px; border-radius: 8px; font-size: 20px;
+      cursor: pointer; transition: all 0.3s ease; display: none;
+    }
+    .hamburger-open:hover { background: #2a2a3a; }
+
+    .main-content { margin-left: 250px; flex: 1; padding: 32px; transition: margin-left 0.3s ease; }
+    body.sidebar-closed .main-content { margin-left: 0; }
+    body.sidebar-closed .hamburger-open { display: block; }
+
     .page-header { margin-bottom: 28px; }
     .page-header h2 { font-size: 24px; font-weight: 700; }
     .page-header p { color: #888; font-size: 14px; margin-top: 4px; }
@@ -78,12 +97,10 @@
     .badge-admin { background: #a855f722; color: #a855f7; }
     .badge-user { background: #3b82f622; color: #3b82f6; }
     .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .add-account-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .add-account-form .full-width { grid-column: span 2; }
-    @media (max-width: 640px) { .add-account-form { grid-template-columns: 1fr; } .add-account-form .full-width { grid-column: span 1; } }
-    .admin-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #1f1f2f; }
-    .admin-form .full-width { grid-column: span 2; }
-    @media (max-width: 640px) { .admin-form { grid-template-columns: 1fr; } .admin-form .full-width { grid-column: span 1; } }
+    .add-account-form, .admin-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .add-account-form .full-width, .admin-form .full-width { grid-column: span 2; }
+    @media (max-width: 640px) { .add-account-form, .admin-form { grid-template-columns: 1fr; } .add-account-form .full-width, .admin-form .full-width { grid-column: span 1; } }
+    .admin-form { padding-bottom: 16px; border-bottom: 1px solid #1f1f2f; }
     .item-card { background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: flex-start; }
     .item-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: #2a2a3a; }
     .item-card .info { flex: 1; }
@@ -97,8 +114,7 @@
     .social-card .s-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
     .social-card .s-desc { color: #888; font-size: 13px; margin-bottom: 12px; }
     .social-card a { display: inline-block; }
-    .hamburger { display: none; position: fixed; top: 16px; left: 16px; z-index: 100; background: #1a1a24; border: 1px solid #2a2a3a; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 20px; }
-    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin-left: 0; padding: 20px; padding-top: 70px; } .hamburger { display: block; } }
+
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0a0a0f; } ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 10px; }
     .toast { position: fixed; bottom: 20px; right: 20px; background: #16a34a; color: #fff; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 200; }
     .toast.error { background: #dc2626; }
@@ -148,7 +164,8 @@
 </head>
 <body>
 <div id="toast" class="toast"></div>
-<button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+<button class="hamburger-open" id="hamburgerOpen" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
 <div id="loginPage">
   <div class="login-box">
     <h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1>
@@ -164,76 +181,43 @@
     <div class="toggle-link">Não tem conta? <span onclick="showRegister()">Cadastre-se</span></div>
   </div>
 </div>
+
 <div id="app">
   <div class="app-layout">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-logo"><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</div>
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</div>
+        <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+      </div>
       <nav>
         <a href="#" class="active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a>
         <a href="#" data-page="chatgeral"><i class="fas fa-comments"></i> Chat Geral</a>
+        <a href="#" data-page="bloxlink"><i class="fas fa-link"></i> Bloxlink</a>
+        <a href="#" data-page="hyperlink"><i class="fas fa-tag"></i> HyperLink</a>
         <a href="#" data-page="metodos"><i class="fas fa-book"></i> Métodos</a>
         <a href="#" data-page="paineis"><i class="fas fa-cubes"></i> Paineis</a>
-        <a href="#" data-page="hyperlink"><i class="fas fa-link"></i> HyperLink</a>
         <a href="#" data-page="tutoriais"><i class="fas fa-video"></i> Tutoriais</a>
         <a href="#" data-page="cofre"><i class="fas fa-vault"></i> Cofre 🔐</a>
         <a href="#" data-page="admin" id="adminLink"><i class="fas fa-shield-halved"></i> Admin</a>
       </nav>
       <div class="user-info"><div class="name" id="sidebarName">Usuário</div><div class="role" id="sidebarRole">Membro</div><button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button></div>
     </aside>
-    <main class="main-content">
-      <section class="page active" id="page-dashboard">
-        <div class="page-header"><h2>Dashboard</h2><p>Bem-vindo, <span id="dashName"></span>!</p></div>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="icon">👥</div><div class="value" id="totalUsers">0</div><div class="label">Usuários</div></div>
-          <div class="stat-card"><div class="icon">🔐</div><div class="value" id="totalContas">0</div><div class="label">Contas no Cofre</div></div>
-          <div class="stat-card"><div class="icon">📚</div><div class="value" id="totalMetodos">0</div><div class="label">Métodos</div></div>
-          <div class="stat-card"><div class="icon">💬</div><div class="value" id="totalChatMsg">0</div><div class="label">Msg no Chat</div></div>
-        </div>
-        <div class="content-card" id="socialAdminArea" style="display:none;">
-          <h3>👑 Gerenciar Links</h3>
-          <div class="admin-form" id="socialForm">
-            <input type="text" id="socNome" placeholder="Nome" />
-            <input type="text" id="socIcon" placeholder="Ícone (youtube, discord)" />
-            <input type="text" id="socLink" placeholder="URL" class="full-width" />
-            <input type="text" id="socDesc" placeholder="Descrição" class="full-width" />
-            <button class="btn-primary full-width" onclick="saveSocialLink()">Adicionar Link</button>
-          </div>
-        </div>
-        <h3 style="margin-bottom:16px;">🔗 Nossos Links</h3>
-        <div class="social-links-grid" id="socialLinksGrid"></div>
+    <main class="main-content" id="mainContent">
+      <section class="page active" id="page-dashboard"><div class="page-header"><h2>Dashboard</h2><p>Bem-vindo, <span id="dashName"></span>!</p></div>
+        <div class="stats-grid"><div class="stat-card"><div class="icon">👥</div><div class="value" id="totalUsers">0</div><div class="label">Usuários</div></div><div class="stat-card"><div class="icon">🔐</div><div class="value" id="totalContas">0</div><div class="label">Contas no Cofre</div></div><div class="stat-card"><div class="icon">📚</div><div class="value" id="totalMetodos">0</div><div class="label">Total de Itens</div></div><div class="stat-card"><div class="icon">💬</div><div class="value" id="totalChatMsg">0</div><div class="label">Msg no Chat</div></div></div>
+        <div class="content-card" id="socialAdminArea" style="display:none;"><h3>👑 Gerenciar Links</h3><div class="admin-form" id="socialForm"><input type="text" id="socNome" placeholder="Nome" /><input type="text" id="socIcon" placeholder="Ícone (youtube, discord)" /><input type="text" id="socLink" placeholder="URL" class="full-width" /><input type="text" id="socDesc" placeholder="Descrição" class="full-width" /><button class="btn-primary full-width" onclick="saveSocialLink()">Adicionar Link</button></div></div>
+        <h3 style="margin-bottom:16px;">🔗 Nossos Links</h3><div class="social-links-grid" id="socialLinksGrid"></div>
       </section>
-      <section class="page" id="page-chatgeral">
-        <div class="page-header"><h2>💬 Chat Geral</h2></div>
-        <div class="content-card chat-geral-container">
-          <div class="chat-geral-messages" id="chatGeralMessages"></div>
-          <div class="chat-geral-input-area"><input type="text" id="chatGeralInput" placeholder="Digite..." onkeydown="if(event.key==='Enter') sendChatGeral()" /><button onclick="sendChatGeral()"><i class="fas fa-paper-plane"></i></button></div>
-          <div id="chatGeralCooldown" style="display:none;"><div class="cooldown-bar"><div class="cooldown-bar-fill" id="cooldownFill"></div></div><p style="color:#888;font-size:12px;margin-top:4px;">Aguarde <span id="cooldownSec">4</span>s</p></div>
-        </div>
-      </section>
+      <section class="page" id="page-chatgeral"><div class="page-header"><h2>💬 Chat Geral</h2></div><div class="content-card chat-geral-container"><div class="chat-geral-messages" id="chatGeralMessages"></div><div class="chat-geral-input-area"><input type="text" id="chatGeralInput" placeholder="Digite..." onkeydown="if(event.key==='Enter') sendChatGeral()" /><button onclick="sendChatGeral()"><i class="fas fa-paper-plane"></i></button></div><div id="chatGeralCooldown" style="display:none;"><div class="cooldown-bar"><div class="cooldown-bar-fill" id="cooldownFill"></div></div><p style="color:#888;font-size:12px;margin-top:4px;">Aguarde <span id="cooldownSec">4</span>s</p></div></div></section>
+      <section class="page" id="page-bloxlink"><div class="page-header"><h2>🔗 Bloxlink</h2><p>Links e recursos</p></div><div id="bloxlinkAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar Bloxlink</h3><div class="admin-form" id="bloxlinkForm"><input type="text" id="bloxTitulo" placeholder="Nome" class="full-width" /><textarea id="bloxDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="bloxLink" placeholder="URL" /><input type="text" id="bloxImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('bloxlink')">Adicionar</button></div><div id="bloxlinkList"></div></div><div id="bloxlinkUserView"></div></section>
+      <section class="page" id="page-hyperlink"><div class="page-header"><h2>🏷️ HyperLink</h2><p>Identifique links do Roblox</p></div><div class="content-card"><div style="display:flex;gap:8px;margin-bottom:16px;"><input type="text" id="robloxLinkInput" placeholder="https://www.roblox.com/..." style="flex:1;" /><button class="btn-primary" onclick="identificarLink()">Executar</button></div><div id="linkResult" style="display:none;padding:16px;background:#1a1a24;border-radius:8px;border:1px solid #2a2a3a;"></div></div></section>
       <section class="page" id="page-metodos"><div class="page-header"><h2>📚 Métodos</h2></div><div id="metodosAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="metodosForm"><input type="text" id="metTitulo" placeholder="Título" class="full-width" /><textarea id="metDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="metLink" placeholder="Link" /><input type="text" id="metImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('metodos')">Adicionar</button></div><div id="metodosList"></div></div><div id="metodosUserView"></div></section>
       <section class="page" id="page-paineis"><div class="page-header"><h2>🧩 Paineis</h2></div><div id="paineisAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="paineisForm"><input type="text" id="painTitulo" placeholder="Nome" class="full-width" /><textarea id="painDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="painLink" placeholder="Link" /><input type="text" id="painImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('paineis')">Adicionar</button></div><div id="paineisList"></div></div><div id="paineisUserView"></div></section>
-      <section class="page" id="page-hyperlink">
-        <div class="page-header"><h2>🔗 HyperLink</h2><p>Identifique links do Roblox</p></div>
-        <div class="content-card">
-          <div style="display:flex;gap:8px;margin-bottom:16px;">
-            <input type="text" id="robloxLinkInput" placeholder="https://www.roblox.com/..." style="flex:1;" />
-            <button class="btn-primary" onclick="identificarLink()">Executar</button>
-          </div>
-          <div id="linkResult" style="display:none;padding:16px;background:#1a1a24;border-radius:8px;border:1px solid #2a2a3a;"></div>
-        </div>
-      </section>
       <section class="page" id="page-tutoriais"><div class="page-header"><h2>🎥 Tutoriais</h2></div><div id="tutoriaisAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="tutoriaisForm"><input type="text" id="tutTitulo" placeholder="Título" class="full-width" /><textarea id="tutDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="tutLink" placeholder="Link" /><input type="text" id="tutImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('tutoriais')">Adicionar</button></div><div id="tutoriaisList"></div></div><div id="tutoriaisUserView"></div></section>
-      <section class="page" id="page-cofre">
-        <div class="page-header"><h2>🔐 Cofre</h2></div>
-        <div class="content-card"><h3>➕ Adicionar Conta</h3><div class="add-account-form"><input type="text" id="accNome" placeholder="Nome" /><input type="text" id="accUsuario" placeholder="Usuário" /><input type="password" id="accSenha" placeholder="Senha" /><input type="text" id="accCookie" placeholder="Cookie (opcional)" /><input type="text" id="accAuth" placeholder="Auth Key (opcional)" class="full-width" /><button class="btn-primary full-width" onclick="addAccount()">Salvar</button></div></div>
-        <div class="content-card"><h3 id="cofreTitle">📋 Minhas Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="cofreTable"></tbody></table></div></div>
-      </section>
-      <section class="page" id="page-admin">
-        <div class="page-header"><h2>👑 Admin</h2></div>
-        <div class="tab-group"><button class="tab-btn active" onclick="switchAdminTab('users', this)">👥 Usuários</button><button class="tab-btn" onclick="switchAdminTab('accounts', this)">🔐 Contas</button></div>
+      <section class="page" id="page-cofre"><div class="page-header"><h2>🔐 Cofre</h2></div><div class="content-card"><h3>➕ Adicionar Conta</h3><div class="add-account-form"><input type="text" id="accNome" placeholder="Nome" /><input type="text" id="accUsuario" placeholder="Usuário" /><input type="password" id="accSenha" placeholder="Senha" /><input type="text" id="accCookie" placeholder="Cookie (opcional)" /><input type="text" id="accAuth" placeholder="Auth Key (opcional)" class="full-width" /><button class="btn-primary full-width" onclick="addAccount()">Salvar</button></div></div><div class="content-card"><h3 id="cofreTitle">📋 Minhas Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="cofreTable"></tbody></table></div></div></section>
+      <section class="page" id="page-admin"><div class="page-header"><h2>👑 Admin</h2></div><div class="tab-group"><button class="tab-btn active" onclick="switchAdminTab('users', this)">👥 Usuários</button><button class="tab-btn" onclick="switchAdminTab('accounts', this)">🔐 Contas</button></div>
         <div class="admin-section active" id="admin-users"><div class="content-card"><h3>👥 Usuários</h3><div class="search-bar"><input type="text" id="userSearch" placeholder="🔍 Pesquisar..." oninput="renderAdmin()" /></div><div class="table-wrap"><table><thead><tr><th>Usuário</th><th>Senha</th><th>Webhook</th><th>Tipo</th><th>Status</th><th>IP</th><th>Contas</th><th>Ações</th></tr></thead><tbody id="adminTable"></tbody></table></div></div></div>
-        <div class="admin-section" id="admin-accounts"><div class="content-card"><h3>🔐 Todas as Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="adminAccountsTable"></tbody></table></div></div></div>
-      </section>
+        <div class="admin-section" id="admin-accounts"><div class="content-card"><h3>🔐 Todas as Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="adminAccountsTable"></tbody></table></div></div></div></section>
     </main>
   </div>
 </div>
@@ -253,24 +237,20 @@
   function toast(msg, type = '') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function esc(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
   async function getIP() { const apis = ['https://api.ipify.org?format=json','https://ip-api.com/json/?fields=query','https://api.country.is/','https://httpbin.org/ip','https://ipwho.is/']; for (const url of apis) { try { const r = await fetch(url, { cache: 'no-store' }); const d = await r.json(); const ip = d.ip || d.query || d.ip_address; if (ip) return ip; } catch {} } return 'Desconhecido'; }
+  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('closed'); document.body.classList.toggle('sidebar-closed'); }
   function showRegister() {
     const box = document.querySelector('.login-box');
     box.innerHTML = `<h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1><p class="sub">Criar Conta</p><form id="registerForm"><div class="error-msg" id="regError"></div><input type="text" id="regUser" placeholder="Usuário" required /><input type="password" id="regPass" placeholder="Senha" required /><input type="url" id="regWebhook" placeholder="Webhook do Discord" required /><div class="field-hint">📬 URL do webhook do Discord</div><button type="submit" class="btn-primary">Cadastrar</button></form><div class="toggle-link">Já tem conta? <span onclick="showLogin()">Faça login</span></div>`;
     document.getElementById('registerForm').addEventListener('submit', async (e) => { e.preventDefault(); const u = document.getElementById('regUser').value.trim(); const p = document.getElementById('regPass').value.trim(); const w = document.getElementById('regWebhook').value.trim(); if (!u || !p || !w) { document.getElementById('regError').textContent = 'Preencha tudo!'; return; } if (!w.startsWith('https://discord.com/api/webhooks/')) { document.getElementById('regError').textContent = 'Só webhook do Discord!'; return; } const { data: exist } = await sb.from('usuarios').select('*').eq('username', u); if (exist?.length) { document.getElementById('regError').textContent = 'Usuário já existe!'; return; } const ip = await getIP(); await sb.from('usuarios').insert({ username: u, password: p, role: 'user', banned: false, ip, webhook: w, loginAttempts: 0, lockedUntil: 0 }); await carregarDados(); toast('Conta criada! Faça login.'); showLogin(); });
   }
-  function showLogin() {
-    const box = document.querySelector('.login-box');
-    box.innerHTML = `<h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1><p class="sub">Painel de Controle</p><form id="loginForm"><div class="error-msg" id="loginError"></div><div class="attempts-info" id="attemptsInfo"></div><div class="lock-info" id="lockInfo"></div><input type="text" id="loginUser" placeholder="Usuário" required /><input type="password" id="loginPass" placeholder="Senha" required /><button type="submit" class="btn-primary" id="loginBtn">Entrar</button></form><div class="toggle-link">Não tem conta? <span onclick="showRegister()">Cadastre-se</span></div>`;
-    document.getElementById('loginForm').addEventListener('submit', loginHandler);
-  }
+  function showLogin() { const box = document.querySelector('.login-box'); box.innerHTML = `<h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1><p class="sub">Painel de Controle</p><form id="loginForm"><div class="error-msg" id="loginError"></div><div class="attempts-info" id="attemptsInfo"></div><div class="lock-info" id="lockInfo"></div><input type="text" id="loginUser" placeholder="Usuário" required /><input type="password" id="loginPass" placeholder="Senha" required /><button type="submit" class="btn-primary" id="loginBtn">Entrar</button></form><div class="toggle-link">Não tem conta? <span onclick="showRegister()">Cadastre-se</span></div>`; document.getElementById('loginForm').addEventListener('submit', loginHandler); }
   async function loginHandler(e) { e.preventDefault(); const u = document.getElementById('loginUser').value.trim(); const p = document.getElementById('loginPass').value.trim(); await carregarDados(); const user = users.find(x => x.username === u); if (!user) { document.getElementById('loginError').textContent = 'Usuário ou senha incorretos!'; return; } if (user.banned) { document.getElementById('loginError').textContent = '❌ Banido!'; return; } const now = Date.now(); if (user.lockedUntil && user.lockedUntil > now) { document.getElementById('loginError').textContent = '🔒 Bloqueado!'; document.getElementById('lockInfo').textContent = `⏳ Tente em ${Math.ceil((user.lockedUntil - now) / 60000)}min`; document.getElementById('loginBtn').disabled = true; const chk = setInterval(() => { if (Date.now() >= user.lockedUntil) { clearInterval(chk); document.getElementById('loginBtn').disabled = false; document.getElementById('lockInfo').textContent = '✅ Liberado!'; } else document.getElementById('lockInfo').textContent = `⏳ Tente em ${Math.ceil((user.lockedUntil - Date.now()) / 60000)}min`; }, 1000); return; } if (user.password !== p) { user.loginAttempts = (user.loginAttempts || 0) + 1; const remaining = 3 - user.loginAttempts; if (user.loginAttempts >= 3) { user.lockedUntil = now + 300000; user.loginAttempts = 0; await sb.from('usuarios').update({ loginAttempts: 0, lockedUntil: now + 300000 }).eq('id', user.id); document.getElementById('loginError').textContent = '❌ Bloqueado por 5 minutos!'; document.getElementById('lockInfo').textContent = '🔒 Tente mais tarde'; return; } await sb.from('usuarios').update({ loginAttempts: user.loginAttempts }).eq('id', user.id); document.getElementById('loginError').textContent = '❌ Senha incorreta!'; document.getElementById('attemptsInfo').textContent = `⚠️ ${remaining} tentativa(s)`; return; } const ipReal = await getIP(); await sb.from('usuarios').update({ loginAttempts: 0, lockedUntil: 0, ip: ipReal }).eq('id', user.id); currentUser = user; currentUser.ip = ipReal; enterApp(); }
   document.getElementById('loginForm').addEventListener('submit', loginHandler);
-  async function enterApp() { document.getElementById('loginPage').style.display = 'none'; document.getElementById('app').style.display = 'block'; document.getElementById('sidebarName').textContent = currentUser.username; document.getElementById('sidebarRole').textContent = currentUser.role === 'admin' ? '👑 Admin' : '👤 Membro'; document.getElementById('dashName').textContent = currentUser.username; const isAdmin = currentUser.role === 'admin'; document.getElementById('adminLink').style.display = isAdmin ? 'flex' : 'none'; document.getElementById('metodosAdminArea').style.display = isAdmin ? 'block' : 'none'; document.getElementById('paineisAdminArea').style.display = isAdmin ? 'block' : 'none'; document.getElementById('tutoriaisAdminArea').style.display = isAdmin ? 'block' : 'none'; document.getElementById('socialAdminArea').style.display = isAdmin ? 'block' : 'none'; document.getElementById('chatToggle').style.display = isAdmin ? 'flex' : 'none'; await updateStats(); await renderCofre(); await renderAllContent(); await renderAdmin(); await renderSocialLinks(); await renderChatMessages(); await renderChatGeral(); navigate('dashboard'); }
+  async function enterApp() { document.getElementById('loginPage').style.display = 'none'; document.getElementById('app').style.display = 'block'; document.getElementById('sidebarName').textContent = currentUser.username; document.getElementById('sidebarRole').textContent = currentUser.role === 'admin' ? '👑 Admin' : '👤 Membro'; document.getElementById('dashName').textContent = currentUser.username; const isAdmin = currentUser.role === 'admin'; document.getElementById('adminLink').style.display = isAdmin ? 'flex' : 'none'; ['metodos','paineis','tutoriais','bloxlink','social'].forEach(a => { const el = document.getElementById(a+'AdminArea'); if (el) el.style.display = isAdmin ? 'block' : 'none'; }); document.getElementById('chatToggle').style.display = isAdmin ? 'flex' : 'none'; await updateStats(); await renderCofre(); await renderAllContent(); await renderAdmin(); await renderSocialLinks(); await renderChatMessages(); await renderChatGeral(); navigate('dashboard'); }
   function navigate(page) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-'+page).classList.add('active'); document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active')); const el = document.querySelector(`.sidebar nav a[data-page="${page}"]`); if (el) el.classList.add('active'); if (page === 'chatgeral') renderChatGeral(); }
-  document.querySelectorAll('.sidebar nav a').forEach(a => { a.addEventListener('click', (e) => { e.preventDefault(); navigate(a.dataset.page); document.getElementById('sidebar').classList.remove('open'); }); });
-  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+  document.querySelectorAll('.sidebar nav a').forEach(a => { a.addEventListener('click', (e) => { e.preventDefault(); navigate(a.dataset.page); }); });
   function logout() { currentUser = null; document.getElementById('loginPage').style.display = 'flex'; document.getElementById('app').style.display = 'none'; document.getElementById('chatToggle').style.display = 'none'; document.getElementById('chatWidget').classList.remove('open'); }
-  async function updateStats() { await carregarDados(); document.getElementById('totalUsers').textContent = users.length; const accs = await getAccounts(); const met = await getContent('metodos'); const chat = await getChatGeral(); document.getElementById('totalContas').textContent = accs.length; document.getElementById('totalMetodos').textContent = met.length; document.getElementById('totalChatMsg').textContent = chat.length; }
+  async function updateStats() { await carregarDados(); document.getElementById('totalUsers').textContent = users.length; const accs = await getAccounts(); document.getElementById('totalContas').textContent = accs.length; const met = await getContent('metodos'); const pain = await getContent('paineis'); const tut = await getContent('tutoriais'); const blox = await getContent('bloxlink'); document.getElementById('totalMetodos').textContent = met.length + pain.length + tut.length + blox.length; const chat = await getChatGeral(); document.getElementById('totalChatMsg').textContent = chat.length; }
   let editingSocial = null;
   async function saveSocialLink() { const n = document.getElementById('socNome').value.trim(); const i = document.getElementById('socIcon').value.trim().toLowerCase(); const l = document.getElementById('socLink').value.trim(); const d = document.getElementById('socDesc').value.trim(); if (!n || !l) { toast('Preencha nome e URL!', 'error'); return; } if (editingSocial) { await sb.from('social_links').update({ nome: n, icon: i, link: l, descricao: d }).eq('id', editingSocial); editingSocial = null; document.querySelector('#socialForm button').textContent = 'Adicionar Link'; toast('Atualizado! ✅'); } else { await sb.from('social_links').insert({ nome: n, icon: i, link: l, descricao: d }); toast('Adicionado! ✅'); } await renderSocialLinks(); document.getElementById('socNome').value = ''; document.getElementById('socIcon').value = ''; document.getElementById('socLink').value = ''; document.getElementById('socDesc').value = ''; }
   async function editSocialLink(id) { const links = await getSocialLinks(); const item = links.find(l => l.id === id); if (!item) return; document.getElementById('socNome').value = item.nome; document.getElementById('socIcon').value = item.icon || ''; document.getElementById('socLink').value = item.link; document.getElementById('socDesc').value = item.descricao || ''; editingSocial = id; document.querySelector('#socialForm button').textContent = '✏️ Salvar Edição'; }
@@ -282,12 +262,12 @@
   async function renderCofre() { const tb = document.getElementById('cofreTable'); const accs = await getAccounts(); if (currentUser.role === 'admin') { document.getElementById('cofreTitle').textContent = '📋 Todas (Admin)'; if (!accs.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>'; return; } tb.innerHTML = accs.map(a => `<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td><td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join(''); } else { document.getElementById('cofreTitle').textContent = '📋 Minhas Contas'; const minhas = accs.filter(a => a.createdBy === currentUser.username); if (!minhas.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Nenhuma sua ainda 🔐</td></tr>'; return; } tb.innerHTML = minhas.map(a => `<tr><td><span class="badge badge-user">você</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td><td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join(''); } }
   function copyText(txt) { navigator.clipboard.writeText(txt).then(() => toast('Copiado! ✅')); }
   let editingContent = { type: null, id: null };
-  async function saveContentItem(type) { const pm = { metodos: 'met', paineis: 'pain', tutoriais: 'tut' }; const p = pm[type]; const titulo = document.getElementById(p+'Titulo').value.trim(); const desc = document.getElementById(p+'Desc').value.trim(); const link = document.getElementById(p+'Link').value.trim(); const img = document.getElementById(p+'Img').value.trim(); if (!titulo || !desc) { toast('Preencha título e descrição!', 'error'); return; } if (editingContent.type === type && editingContent.id) { await sb.from('conteudo').update({ titulo, descricao: desc, link, img }).eq('id', editingContent.id); editingContent = { type: null, id: null }; document.querySelector(`#${type}Form button`).textContent = 'Adicionar'; toast('Atualizado! ✅'); } else { await sb.from('conteudo').insert({ tipo: type, titulo, descricao: desc, link, img, createdBy: currentUser.username }); toast('Adicionado! ✅'); } await renderContentList(type); await updateStats(); document.getElementById(p+'Titulo').value = ''; document.getElementById(p+'Desc').value = ''; document.getElementById(p+'Link').value = ''; document.getElementById(p+'Img').value = ''; }
-  async function editContentItem(type, id) { const items = await getContent(type); const item = items.find(i => i.id === id); if (!item) return; const pm = { metodos: 'met', paineis: 'pain', tutoriais: 'tut' }; const p = pm[type]; document.getElementById(p+'Titulo').value = item.titulo; document.getElementById(p+'Desc').value = item.descricao; document.getElementById(p+'Link').value = item.link || ''; document.getElementById(p+'Img').value = item.img || ''; editingContent = { type, id }; document.querySelector(`#${type}Form button`).textContent = '✏️ Salvar Edição'; }
+  async function saveContentItem(type) { const pm = { metodos: 'met', paineis: 'pain', tutoriais: 'tut', bloxlink: 'blox' }; const p = pm[type]; const titulo = document.getElementById(p+'Titulo').value.trim(); const desc = document.getElementById(p+'Desc').value.trim(); const link = document.getElementById(p+'Link').value.trim(); const img = document.getElementById(p+'Img').value.trim(); if (!titulo || !desc) { toast('Preencha título e descrição!', 'error'); return; } if (editingContent.type === type && editingContent.id) { await sb.from('conteudo').update({ titulo, descricao: desc, link, img }).eq('id', editingContent.id); editingContent = { type: null, id: null }; document.querySelector(`#${type}Form button`).textContent = 'Adicionar'; toast('Atualizado! ✅'); } else { await sb.from('conteudo').insert({ tipo: type, titulo, descricao: desc, link, img, createdBy: currentUser.username }); toast('Adicionado! ✅'); } await renderContentList(type); await updateStats(); document.getElementById(p+'Titulo').value = ''; document.getElementById(p+'Desc').value = ''; document.getElementById(p+'Link').value = ''; document.getElementById(p+'Img').value = ''; }
+  async function editContentItem(type, id) { const items = await getContent(type); const item = items.find(i => i.id === id); if (!item) return; const pm = { metodos: 'met', paineis: 'pain', tutoriais: 'tut', bloxlink: 'blox' }; const p = pm[type]; document.getElementById(p+'Titulo').value = item.titulo; document.getElementById(p+'Desc').value = item.descricao; document.getElementById(p+'Link').value = item.link || ''; document.getElementById(p+'Img').value = item.img || ''; editingContent = { type, id }; document.querySelector(`#${type}Form button`).textContent = '✏️ Salvar Edição'; }
   async function deleteContentItem(type, id) { if (!confirm('Deletar?')) return; await sb.from('conteudo').delete().eq('id', id); await renderContentList(type); await updateStats(); if (editingContent.type === type && editingContent.id === id) { editingContent = { type: null, id: null }; document.querySelector(`#${type}Form button`).textContent = 'Adicionar'; } toast('Removido!'); }
   async function renderContentList(type) { const items = await getContent(type); const c = document.getElementById(type+'List'); if (!items.length) { c.innerHTML = '<p style="color:#666;">Nenhum item 👆</p>'; return; } c.innerHTML = items.map(i => `<div class="item-card">${i.img ? `<img src="${esc(i.img)}" alt="" onerror="this.style.display='none'" />` : ''}<div class="info"><h4>${esc(i.titulo)}</h4><p>${esc(i.descricao)}</p>${i.link ? `<a href="${esc(i.link)}" target="_blank">🔗 ${esc(i.link)}</a>` : ''}<div class="meta">${esc(i.createdBy)}</div><div class="actions" style="margin-top:8px;"><button class="btn-edit btn-sm" onclick="editContentItem('${type}', ${i.id})"><i class="fas fa-edit"></i></button><button class="btn-danger btn-sm" onclick="deleteContentItem('${type}', ${i.id})"><i class="fas fa-trash"></i></button></div></div></div>`).join(''); }
   async function renderUserContent(type) { const items = await getContent(type); const c = document.getElementById(type+'UserView'); if (!items.length) { c.innerHTML = '<div class="content-card"><p style="color:#666;">Nenhum conteúdo 📭</p></div>'; return; } c.innerHTML = items.map(i => `<div class="item-card">${i.img ? `<img src="${esc(i.img)}" alt="" onerror="this.style.display='none'" />` : ''}<div class="info"><h4>${esc(i.titulo)}</h4><p>${esc(i.descricao)}</p>${i.link ? `<a href="${esc(i.link)}" target="_blank">🔗 Acessar</a>` : ''}</div></div>`).join(''); }
-  async function renderAllContent() { for (const t of ['metodos', 'paineis', 'tutoriais']) { await renderContentList(t); await renderUserContent(t); } }
+  async function renderAllContent() { for (const t of ['metodos', 'paineis', 'tutoriais', 'bloxlink']) { await renderContentList(t); await renderUserContent(t); } }
   async function renderAdmin() { const tb = document.getElementById('adminTable'); await carregarDados(); const accs = await getAccounts(); const search = (document.getElementById('userSearch').value || '').toLowerCase(); const filtered = users.filter(u => u.username.toLowerCase().includes(search)); tb.innerHTML = filtered.map(u => { const qtd = accs.filter(a => a.createdBy === u.username).length; return `<tr style="${u.banned ? 'opacity:0.5;' : ''}"><td><strong>${esc(u.username)}</strong></td><td><span class="val-full">${esc(u.password)}</span> <button class="copy-btn" onclick="copyText('${esc(u.password).replace(/'/g, "\\'")}')">📋</button></td><td>${u.webhook ? `<span class="val-full" style="max-width:180px;">${esc(u.webhook)}</span> <button class="copy-btn" onclick="copyText('${esc(u.webhook).replace(/'/g, "\\'")}')">📋</button>` : '<span style="color:#666;">—</span>'}</td><td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td><td><span class="badge ${u.banned ? 'badge-banned' : 'badge-active'}">${u.banned ? '❌ Banido' : '✅ Ativo'}</span></td><td><span class="mono">${u.ip || '-'}</span></td><td>${qtd}</td><td><div class="actions">${u.username !== 'rimuro' ? `${u.banned ? `<button class="btn-success btn-sm" onclick="unbanUser('${u.username}')"><i class="fas fa-check"></i></button>` : `<button class="btn-warning btn-sm" onclick="banUser('${u.username}')"><i class="fas fa-ban"></i></button>`}<button class="btn-danger btn-sm" onclick="deleteUser('${u.username}')"><i class="fas fa-trash"></i></button>` : '<span style="color:#888;">—</span>'}</div></td></tr>`; }).join(''); if (!filtered.length) tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666;padding:32px;">Nenhum 🔍</td></tr>'; }
   async function renderAdminAccounts() { const tb = document.getElementById('adminAccountsTable'); const accs = await getAccounts(); if (!accs.length) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>'; return; } tb.innerHTML = accs.map(a => `<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g, "\\'")}')">📋</button></td><td>${a.cookie ? `<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td>${a.auth ? `<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g, "\\'")}')">Copiar</button>` : '—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }
   async function banUser(u) { await sb.from('usuarios').update({ banned: true }).eq('username', u); await renderAdmin(); toast(`${u} banido!`); }
@@ -295,44 +275,7 @@
   async function deleteUser(u) { if (!confirm(`Deletar ${u}?`)) return; await sb.from('usuarios').delete().eq('username', u); await renderAdmin(); await updateStats(); toast(`${u} removido!`); }
   function switchAdminTab(tab, btn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active')); document.getElementById('admin-'+tab).classList.add('active'); if (tab === 'accounts') renderAdminAccounts(); }
 
-  // ========== HYPERLINK ==========
-  function identificarLink() {
-    const input = document.getElementById('robloxLinkInput');
-    const link = input.value.trim();
-    const result = document.getElementById('linkResult');
-    if (!link) { result.style.display = 'block'; result.innerHTML = '<p style="color:#ef4444;">❌ Cole um link primeiro!</p>'; return; }
-    let tipo = ''; let cor = ''; let linkOficial = '';
-    const userMatch = link.match(/users\/(\d+)\/profile/);
-    if (userMatch) { tipo = '👤 Usuário'; cor = '#3b82f6'; linkOficial = `https*:*//www.roblox.com/users/${userMatch[1]}/profile`; }
-    const groupMatch = link.match(/(?:communities|share\/g)\/(\d+)/);
-    if (groupMatch) { tipo = '🏢 Grupo'; cor = '#a855f7'; linkOficial = `https*:*//www.roblox.com/communities/${groupMatch[1]}/`; }
-    const psMatch = link.match(/privateServerLinkCode=([a-f0-9]+)/);
-    const gameMatch = link.match(/games\/(\d+)\/([^/?]+)/);
-    if (psMatch) {
-      tipo = '🔒 Private Server'; cor = '#f59e0b';
-      const code = psMatch[1];
-      if (gameMatch) { linkOficial = `https*:*//www.roblox.com/games/${gameMatch[1]}/${gameMatch[2]}?privateServerLinkCode=${code}`; }
-      else { linkOficial = `https*:*//www.roblox.com/games/0/Game?privateServerLinkCode=${code}`; }
-    }
-    result.style.display = 'block';
-    if (linkOficial) {
-      result.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <span style="font-size:32px;">${tipo.split(' ')[0]}</span>
-          <div>
-            <div style="font-weight:600;font-size:18px;color:${cor};">${tipo}</div>
-            <div style="color:#666;font-size:11px;word-break:break-all;margin-top:2px;">Original: ${esc(link)}</div>
-          </div>
-        </div>
-        <div style="padding:12px;background:#0a0a0f;border-radius:8px;border:1px solid #2a2a3a;">
-          <div style="color:#888;font-size:12px;margin-bottom:6px;">📌 Resultado:</div>
-          <div style="background:#1a1a24;padding:10px;border-radius:6px;font-size:13px;word-break:break-all;">
-            <span style="color:#16a34a;">[${linkOficial}]</span><span style="color:#888;">(${esc(link)})</span>
-          </div>
-          <button class="copy-btn" onclick="copyText('[${linkOficial}](${link})')" style="margin-top:8px;">📋 Copiar</button>
-        </div>`;
-    } else { result.innerHTML = '<p style="color:#ef4444;">❌ Link do Roblox não reconhecido</p>'; }
-  }
+  function identificarLink() { const input = document.getElementById('robloxLinkInput'); const link = input.value.trim(); const result = document.getElementById('linkResult'); if (!link) { result.style.display = 'block'; result.innerHTML = '<p style="color:#ef4444;">❌ Cole um link primeiro!</p>'; return; } let tipo = ''; let cor = ''; let linkOficial = ''; const userMatch = link.match(/users\/(\d+)\/profile/); if (userMatch) { tipo = '👤 Usuário'; cor = '#3b82f6'; linkOficial = `https*:*//www.roblox.com/users/${userMatch[1]}/profile`; } const groupMatch = link.match(/(?:communities|share\/g)\/(\d+)/); if (groupMatch) { tipo = '🏢 Grupo'; cor = '#a855f7'; linkOficial = `https*:*//www.roblox.com/communities/${groupMatch[1]}/`; } const psMatch = link.match(/privateServerLinkCode=([a-f0-9]+)/); const gameMatch = link.match(/games\/(\d+)\/([^/?]+)/); if (psMatch) { tipo = '🔒 Private Server'; cor = '#f59e0b'; const code = psMatch[1]; if (gameMatch) { linkOficial = `https*:*//www.roblox.com/games/${gameMatch[1]}/${gameMatch[2]}?privateServerLinkCode=${code}`; } else { linkOficial = `https*:*//www.roblox.com/games/0/Game?privateServerLinkCode=${code}`; } } result.style.display = 'block'; if (linkOficial) { result.innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="font-size:32px;">${tipo.split(' ')[0]}</span><div><div style="font-weight:600;font-size:18px;color:${cor};">${tipo}</div><div style="color:#666;font-size:11px;word-break:break-all;margin-top:2px;">Original: ${esc(link)}</div></div></div><div style="padding:12px;background:#0a0a0f;border-radius:8px;border:1px solid #2a2a3a;"><div style="color:#888;font-size:12px;margin-bottom:6px;">📌 Resultado:</div><div style="background:#1a1a24;padding:10px;border-radius:6px;font-size:13px;word-break:break-all;"><span style="color:#16a34a;">[${linkOficial}]</span><span style="color:#888;">(${esc(link)})</span></div><button class="copy-btn" onclick="copyText('[${linkOficial}](${link})')" style="margin-top:8px;">📋 Copiar</button></div>`; } else { result.innerHTML = '<p style="color:#ef4444;">❌ Link do Roblox não reconhecido</p>'; } }
 
   async function sendChatGeral() { const input = document.getElementById('chatGeralInput'); const text = input.value.trim(); if (!text) return; if (currentUser.role !== 'admin' && chatCooldown) { toast('Aguarde 4s!', 'error'); return; } await sb.from('chat_geral').insert({ user: currentUser.username, text, time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), role: currentUser.role }); input.value = ''; await renderChatGeral(); await updateStats(); if (currentUser.role !== 'admin') { chatCooldown = true; const cd = document.getElementById('chatGeralCooldown'); cd.style.display = 'block'; let sec = 4; const f = document.getElementById('cooldownFill'); const s = document.getElementById('cooldownSec'); f.style.width = '100%'; const iv = setInterval(() => { sec--; s.textContent = sec; f.style.width = (sec/4)*100+'%'; if (sec<=0) { clearInterval(iv); cd.style.display='none'; chatCooldown=false; } }, 1000); } }
   async function deleteChatGeralMsg(id) { if (currentUser.role !== 'admin') { toast('Só admin!', 'error'); return; } if (!confirm('Deletar?')) return; await sb.from('chat_geral').delete().eq('id', id); await renderChatGeral(); await updateStats(); toast('Deletada!'); }
