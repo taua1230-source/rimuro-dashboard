@@ -6,158 +6,126 @@
   <title>Rimuro Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
-    a { color: #a855f7; }
-    input,textarea,select { background: #1a1a24; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px 14px; border-radius: 8px; width: 100%; outline: none; }
-    input:focus,textarea:focus { border-color: #a855f7; }
-    textarea { resize: vertical; min-height: 80px; }
-    button { cursor: pointer; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; transition: all 0.2s; font-family: 'Inter',sans-serif; }
-    .btn-primary { background: linear-gradient(135deg,#a855f7,#7c3aed); color: #fff; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(168,85,247,0.3); }
-    .btn-danger { background: #dc2626; color: #fff; }
-    .btn-success { background: #16a34a; color: #fff; }
-    .btn-warning { background: #f59e0b; color: #000; }
-    .btn-edit { background: #3b82f6; color: #fff; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    .btn-xs { padding: 3px 8px; font-size: 11px; border-radius: 6px; }
-    #loginPage { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: radial-gradient(ellipse at top,#1a0a2e,#0a0a0f); }
-    .login-box { background: #12121a; border: 1px solid #2a2a3a; border-radius: 16px; padding: 40px; width: 400px; max-width: 90vw; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
-    .login-box h1 { font-size: 28px; background: linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .logo-img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; -webkit-text-fill-color: initial; }
-    .login-box p.sub { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
-    .login-box form { display: flex; flex-direction: column; gap: 14px; }
-    .login-box .toggle-link { text-align: center; margin-top: 16px; font-size: 14px; color: #888; }
-    .login-box .toggle-link span { color: #a855f7; cursor: pointer; font-weight: 600; }
-    .login-box .error-msg { color: #ef4444; font-size: 13px; text-align: center; min-height: 20px; }
-    .login-box .field-hint { color: #666; font-size: 12px; margin-top: -8px; }
-    .login-box .attempts-info { color: #f59e0b; font-size: 12px; text-align: center; }
-    .login-box .lock-info { color: #ef4444; font-size: 12px; text-align: center; font-weight: 600; }
-    #app { display: none; }
-    .app-layout { display: flex; min-height: 100vh; }
-    .sidebar { width: 250px; background: #0f0f17; border-right: 1px solid #1f1f2f; padding: 24px 16px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; transition: transform 0.3s ease; }
-    .sidebar.closed { transform: translateX(-250px); }
-    .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-    .sidebar-logo { font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
-    .sidebar-logo .logo-img { width: 32px; height: 32px; border-radius: 8px; }
-    .sidebar-close { background: transparent; border: none; color: #888; font-size: 20px; padding: 8px; cursor: pointer; border-radius: 8px; }
-    .sidebar-close:hover { background: #1a1a2a; color: #fff; }
-    .sidebar nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-    .sidebar nav a { padding: 12px 14px; border-radius: 10px; color: #a0a0b0; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 12px; transition: all 0.2s; }
-    .sidebar nav a:hover { background: #1a1a2a; color: #fff; }
-    .sidebar nav a.active { background: linear-gradient(135deg,#a855f722,#7c3aed22); color: #a855f7; border: 1px solid #a855f733; }
-    .sidebar nav a i { width: 20px; text-align: center; }
-    .sidebar .user-info { padding: 16px; background: #1a1a24; border-radius: 10px; font-size: 13px; }
-    .sidebar .user-info .name { font-weight: 600; color: #fff; }
-    .sidebar .user-info .role { color: #a855f7; font-size: 12px; }
-    .btn-logout { margin-top: 8px; background: transparent; border: 1px solid #2a2a3a; color: #ef4444; width: 100%; font-size: 13px; }
-    .btn-logout:hover { background: #ef444422; }
-    .hamburger-open { position: fixed; top: 16px; left: 16px; z-index: 45; background: #1a1a24; border: 1px solid #2a2a3a; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 20px; cursor: pointer; display: none; }
-    .hamburger-open:hover { background: #2a2a3a; }
-    .main-content { margin-left: 250px; flex: 1; padding: 32px; transition: margin-left 0.3s ease; }
-    body.sidebar-closed .main-content { margin-left: 0; }
-    body.sidebar-closed .hamburger-open { display: block; }
-    .page-header { margin-bottom: 28px; }
-    .page-header h2 { font-size: 24px; font-weight: 700; }
-    .page-header p { color: #888; font-size: 14px; margin-top: 4px; }
-    .page { display: none; }
-    .page.active { display: block; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; margin-bottom: 28px; }
-    .stat-card { background: #12121a; border: 1px solid #1f1f2f; border-radius: 12px; padding: 20px; }
-    .stat-card .icon { font-size: 28px; margin-bottom: 8px; }
-    .stat-card .value { font-size: 28px; font-weight: 700; }
-    .stat-card .label { color: #888; font-size: 13px; }
-    .content-card { background: #12121a; border: 1px solid #1f1f2f; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
-    .content-card h3 { margin-bottom: 12px; }
-    .content-card p { color: #aaa; font-size: 14px; line-height: 1.6; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th,td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #1f1f2f; }
-    th { color: #888; font-weight: 600; font-size: 12px; text-transform: uppercase; }
-    td { color: #ddd; }
-    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-active { background: #16a34a22; color: #16a34a; }
-    .badge-banned { background: #dc262622; color: #dc2626; }
-    .badge-admin { background: #a855f722; color: #a855f7; }
-    .badge-user { background: #3b82f622; color: #3b82f6; }
-    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .add-account-form,.admin-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .add-account-form .full-width,.admin-form .full-width { grid-column: span 2; }
-    @media(max-width:640px){.add-account-form,.admin-form{grid-template-columns:1fr}.add-account-form .full-width,.admin-form .full-width{grid-column:span 1}}
-    .admin-form { padding-bottom: 16px; border-bottom: 1px solid #1f1f2f; }
-    .item-card { background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: flex-start; }
-    .item-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0; background: #2a2a3a; }
-    .item-card .info { flex: 1; }
-    .item-card .info h4 { margin-bottom: 6px; }
-    .item-card .info p { color: #aaa; font-size: 13px; margin-bottom: 6px; }
-    .item-card .info a { font-size: 13px; }
-    .social-links-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 16px; margin-bottom: 28px; }
-    .social-card { background: #12121a; border: 1px solid #1f1f2f; border-radius: 12px; padding: 24px; text-align: center; transition: all 0.2s; }
-    .social-card:hover { border-color: #a855f733; transform: translateY(-2px); }
-    .social-card .s-icon { font-size: 40px; margin-bottom: 12px; }
-    .social-card .s-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
-    .social-card .s-desc { color: #888; font-size: 13px; margin-bottom: 12px; }
-    .social-card a { display: inline-block; }
-    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0a0a0f; } ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 10px; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: #16a34a; color: #fff; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 200; }
-    .toast.error { background: #dc2626; }
-    .toast.show { opacity: 1; transform: translateY(0); }
-    .tab-group { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-    .tab-btn { background: #1a1a24; color: #aaa; padding: 8px 16px; border-radius: 8px; border: 1px solid #2a2a3a; font-size: 13px; cursor: pointer; }
-    .tab-btn.active { background: #a855f722; border-color: #a855f7; color: #a855f7; }
-    .admin-section { display: none; }
-    .admin-section.active { display: block; }
-    .mono { font-family: monospace; font-size: 12px; word-break: break-all; }
-    .copy-btn { background: transparent; border: 1px solid #3a3a4a; color: #aaa; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 4px; white-space: nowrap; cursor: pointer; }
-    .copy-btn:hover { border-color: #a855f7; color: #a855f7; }
-    .val-full { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; display: inline-block; line-height: 1.4; }
-    .search-bar { margin-bottom: 16px; max-width: 400px; }
-    .chat-geral-container { display: flex; flex-direction: column; height: calc(100vh - 160px); max-height: 600px; }
-    .chat-geral-messages { flex: 1; overflow-y: auto; padding: 16px; background: #0f0f17; border-radius: 12px; border: 1px solid #1f1f2f; display: flex; flex-direction: column; gap: 8px; min-height: 300px; margin-bottom: 12px; }
-    .chat-geral-input-area { display: flex; gap: 8px; }
-    .chat-geral-msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 13px; line-height: 1.4; }
-    .chat-geral-msg.self { background: #a855f722; border: 1px solid #a855f733; align-self: flex-end; border-bottom-right-radius: 4px; }
-    .chat-geral-msg.other { background: #1a1a24; border: 1px solid #2a2a3a; align-self: flex-start; border-bottom-left-radius: 4px; }
-    .chat-geral-msg .msg-user { font-weight: 600; font-size: 11px; color: #a855f7; margin-bottom: 2px; }
-    .chat-geral-msg .msg-user.admin { color: #f59e0b; }
-    .chat-geral-msg .msg-time { font-size: 10px; color: #666; margin-top: 2px; }
-    .chat-geral-msg .msg-actions { display: flex; gap: 4px; margin-top: 4px; }
-    .chat-empty { color: #666; font-size: 13px; text-align: center; padding: 40px 0; }
-    .cooldown-bar { height: 3px; background: #2a2a3a; border-radius: 4px; overflow: hidden; margin-top: 4px; }
-    .cooldown-bar-fill { height: 100%; background: #a855f7; width: 0%; transition: width 0.1s linear; }
-    .chat-toggle { position: fixed; bottom: 20px; right: 20px; z-index: 300; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg,#a855f7,#7c3aed); color: #fff; font-size: 24px; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(168,85,247,0.4); border: none; cursor: pointer; }
-    .chat-toggle:hover { transform: scale(1.1); }
-    .chat-toggle .badge-count { position: absolute; top: -4px; right: -4px; background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-    .chat-widget { position: fixed; bottom: 88px; right: 20px; z-index: 299; width: 360px; max-width: calc(100vw - 40px); max-height: 500px; background: #12121a; border: 1px solid #2a2a3a; border-radius: 16px; display: none; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.6); overflow: hidden; }
-    .chat-widget.open { display: flex; }
-    .chat-header { padding: 14px 18px; background: #1a1a24; border-bottom: 1px solid #2a2a3a; display: flex; align-items: center; justify-content: space-between; }
-    .chat-header h4 { font-size: 14px; gap: 8px; display: flex; align-items: center; } .chat-header h4 i { color: #a855f7; }
-    .chat-close { background: transparent; color: #888; font-size: 18px; padding: 4px 8px; } .chat-close:hover { color: #ef4444; }
-    .chat-messages { flex: 1; padding: 14px 18px; overflow-y: auto; max-height: 320px; min-height: 200px; display: flex; flex-direction: column; gap: 8px; }
-    .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 85%; font-size: 13px; line-height: 1.4; }
-    .chat-msg.self { background: #a855f722; border: 1px solid #a855f733; align-self: flex-end; border-bottom-right-radius: 4px; }
-    .chat-msg.other { background: #1a1a24; border: 1px solid #2a2a3a; align-self: flex-start; border-bottom-left-radius: 4px; }
-    .chat-msg .msg-user { font-weight: 600; font-size: 11px; color: #a855f7; margin-bottom: 2px; }
-    .chat-msg .msg-time { font-size: 10px; color: #666; margin-top: 2px; text-align: right; }
-    .chat-input-area { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid #2a2a3a; background: #0f0f17; }
-    .chat-input-area input { flex: 1; background: #1a1a24; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px 14px; border-radius: 10px; font-size: 13px; outline: none; }
-    .chat-input-area input:focus { border-color: #a855f7; }
-    .chat-input-area button { background: #a855f7; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; } .chat-input-area button:hover { background: #7c3aed; }
-    .input-group { display: flex; gap: 8px; align-items: center; }
-    .input-group input { flex: 1; }
-    .toggle-vis { background: transparent; border: 1px solid #3a3a4a; color: #aaa; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; white-space: nowrap; }
-    .toggle-vis:hover { border-color: #a855f7; color: #a855f7; }
-    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1f1f2f; }
-    .info-row:last-child { border-bottom: none; }
-    .info-row .label { color: #888; font-size: 13px; }
-    .info-row .value { color: #fff; font-weight: 500; font-size: 14px; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#0a0a0f;color:#e0e0e0;min-height:100vh}
+    a{color:#a855f7;text-decoration:none}
+    input,textarea,select{background:#1a1a24;border:1px solid #2a2a3a;color:#e0e0e0;padding:10px 14px;border-radius:8px;width:100%;outline:none;font-family:'Inter',sans-serif}
+    input:focus,textarea:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.15)}
+    textarea{resize:vertical;min-height:80px}
+    button{cursor:pointer;border:none;border-radius:8px;padding:10px 20px;font-weight:600;font-family:'Inter',sans-serif;transition:all .3s cubic-bezier(.4,0,.2,1)}
+    .btn-primary{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(168,85,247,.3)}
+    .btn-danger{background:#dc2626;color:#fff}
+    .btn-danger:hover{background:#b91c1c;transform:translateY(-1px)}
+    .btn-success{background:#16a34a;color:#fff}
+    .btn-warning{background:#f59e0b;color:#000}
+    .btn-edit{background:#3b82f6;color:#fff}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .btn-xs{padding:3px 8px;font-size:11px;border-radius:6px}
+    .copy-btn{background:transparent;border:1px solid #3a3a4a;color:#aaa;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:4px;cursor:pointer}
+    .copy-btn:hover{border-color:#a855f7;color:#a855f7}
+    #loginPage{display:flex;justify-content:center;align-items:center;min-height:100vh;background:radial-gradient(ellipse at top,#1a0a2e,#0a0a0f)}
+    .login-box{background:#12121a;border:1px solid #2a2a3a;border-radius:16px;padding:40px;width:400px;max-width:90vw;box-shadow:0 25px 60px rgba(0,0,0,.5)}
+    .login-box h1{font-size:28px;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px}
+    .logo-img{width:36px;height:36px;border-radius:10px;object-fit:cover;-webkit-text-fill-color:initial}
+    .login-box p.sub{text-align:center;color:#888;margin-bottom:24px;font-size:14px}
+    .login-box form{display:flex;flex-direction:column;gap:14px}
+    .login-box .toggle-link{text-align:center;margin-top:16px;font-size:14px;color:#888}
+    .login-box .toggle-link span{color:#a855f7;cursor:pointer;font-weight:600}
+    .login-box .error-msg{color:#ef4444;font-size:13px;text-align:center;min-height:20px}
+    .login-box .field-hint{color:#666;font-size:12px;margin-top:-8px}
+    .login-box .lock-info{color:#ef4444;font-size:12px;text-align:center;font-weight:600}
+    .login-box .attempts-info{color:#f59e0b;font-size:12px;text-align:center}
+    #app{display:none}
+    .app-layout{display:flex;min-height:100vh}
+    .sidebar{width:250px;background:#0f0f17;border-right:1px solid #1f1f2f;padding:24px 16px;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .35s cubic-bezier(.4,0,.2,1)}
+    .sidebar.closed{transform:translateX(-250px)}
+    .sidebar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+    .sidebar-logo{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px}
+    .sidebar-logo .logo-img{width:32px;height:32px;border-radius:8px}
+    .sidebar-close{background:transparent;border:none;color:#888;font-size:20px;padding:8px;cursor:pointer;border-radius:8px}
+    .sidebar-close:hover{background:#1a1a2a;color:#fff}
+    .sidebar nav{display:flex;flex-direction:column;gap:4px;flex:1}
+    .sidebar nav a{padding:12px 14px;border-radius:10px;color:#a0a0b0;font-weight:500;font-size:14px;display:flex;align-items:center;gap:12px;transition:all .3s}
+    .sidebar nav a:hover{background:#1a1a2a;color:#fff;transform:translateX(4px)}
+    .sidebar nav a.active{background:linear-gradient(135deg,#a855f722,#7c3aed22);color:#a855f7;border:1px solid #a855f733}
+    .sidebar nav a i{width:20px;text-align:center}
+    .sidebar .user-info{padding:16px;background:#1a1a24;border-radius:10px;font-size:13px}
+    .sidebar .user-info .name{font-weight:600;color:#fff}
+    .sidebar .user-info .role{color:#a855f7;font-size:12px}
+    .btn-logout{margin-top:8px;background:transparent;border:1px solid #2a2a3a;color:#ef4444;width:100%;font-size:13px}
+    .btn-logout:hover{background:#ef444422}
+    .hamburger-open{position:fixed;top:16px;left:16px;z-index:45;background:#1a1a24;border:1px solid #2a2a3a;color:#fff;padding:10px 14px;border-radius:8px;font-size:20px;cursor:pointer;display:none}
+    .hamburger-open:hover{background:#2a2a3a}
+    .main-content{margin-left:250px;flex:1;padding:32px;transition:margin-left .35s cubic-bezier(.4,0,.2,1)}
+    body.sidebar-closed .main-content{margin-left:0}
+    body.sidebar-closed .hamburger-open{display:block}
+    .page-header{margin-bottom:28px}
+    .page-header h2{font-size:24px;font-weight:700}
+    .page-header p{color:#888;font-size:14px;margin-top:4px}
+    .page{display:none}
+    .page.active{display:block;animation:fadeIn .3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
+    .stat-card{background:#12121a;border:1px solid #1f1f2f;border-radius:12px;padding:20px;transition:all .3s}
+    .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(168,85,247,.1);border-color:#a855f744}
+    .stat-card .icon{font-size:28px;margin-bottom:8px}
+    .stat-card .value{font-size:28px;font-weight:700}
+    .stat-card .label{color:#888;font-size:13px}
+    .content-card{background:#12121a;border:1px solid #1f1f2f;border-radius:12px;padding:24px;margin-bottom:16px;transition:all .3s}
+    .content-card:hover{border-color:#a855f744}
+    .content-card h3{margin-bottom:12px}
+    .content-card p{color:#aaa;font-size:14px;line-height:1.6}
+    .content-card .meta{color:#666;font-size:12px;margin-top:8px}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:12px 16px;text-align:left;border-bottom:1px solid #1f1f2f}
+    th{color:#888;font-weight:600;font-size:12px;text-transform:uppercase;background:#1a1a24;position:sticky;top:0}
+    td{color:#ddd}
+    tr:hover{background:#1a1a2a}
+    tr{transition:background .2s}
+    .badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+    .badge-active{background:#16a34a22;color:#16a34a}
+    .badge-banned{background:#dc262622;color:#dc2626}
+    .badge-admin{background:#a855f722;color:#a855f7}
+    .badge-user{background:#3b82f622;color:#3b82f6}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .admin-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #1f1f2f}
+    .admin-form .full-width{grid-column:span 2}
+    .item-card{background:#1a1a24;border:1px solid #2a2a3a;border-radius:12px;padding:16px;margin-bottom:12px;display:flex;gap:16px;align-items:flex-start;transition:all .3s}
+    .item-card:hover{border-color:#a855f744;transform:translateX(4px)}
+    .item-card img{width:80px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#2a2a3a}
+    .item-card .info{flex:1}
+    .item-card .info h4{margin-bottom:6px}
+    .item-card .info p{color:#aaa;font-size:13px;margin-bottom:6px}
+    .item-card .info a{font-size:13px}
+    .social-links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+    .social-card{background:#12121a;border:1px solid #1f1f2f;border-radius:12px;padding:24px;text-align:center;transition:all .3s}
+    .social-card:hover{border-color:#a855f733;transform:translateY(-4px) scale(1.02);box-shadow:0 12px 40px rgba(168,85,247,.15)}
+    .social-card .s-icon{font-size:40px;margin-bottom:12px}
+    .social-card .s-name{font-weight:600;font-size:16px;margin-bottom:4px}
+    .social-card .s-desc{color:#888;font-size:13px;margin-bottom:12px}
+    .social-card a{display:inline-block}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0a0a0f}::-webkit-scrollbar-thumb{background:#2a2a3a;border-radius:10px}
+    .toast{position:fixed;bottom:20px;right:20px;background:#16a34a;color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;transform:translateY(20px);transition:all .3s;z-index:200}
+    .toast.error{background:#dc2626}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .tab-group{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .tab-btn{background:#1a1a24;color:#aaa;padding:8px 16px;border-radius:8px;border:1px solid #2a2a3a;font-size:13px;cursor:pointer;transition:all .3s}
+    .tab-btn.active{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border:none;transform:translateY(-1px);box-shadow:0 4px 15px rgba(168,85,247,.3)}
+    .admin-section{display:none}
+    .admin-section.active{display:block;animation:fadeIn .3s ease}
+    .mono{font-family:monospace;font-size:12px;word-break:break-all}
+    .val-full{font-family:monospace;font-size:11px;word-break:break-all;max-width:200px;display:inline-block;line-height:1.4}
+    .search-bar{margin-bottom:16px;max-width:400px}
+    @media(max-width:768px){.sidebar{width:280px}.sidebar.closed{transform:translateX(-100%)}body.sidebar-closed .sidebar{transform:translateX(-100%)}.main-content{margin-left:0!important;padding:16px;padding-top:70px}.hamburger-open{display:block!important}.page-header h2{font-size:18px}.stats-grid{grid-template-columns:1fr 1fr}.content-card{padding:14px}.admin-form{grid-template-columns:1fr}.admin-form .full-width{grid-column:1}table{font-size:11px;min-width:500px}th,td{padding:6px 8px;white-space:nowrap}.social-links-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:480px){.stats-grid{grid-template-columns:1fr}.social-links-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
-<button class="hamburger-open" id="hamburgerOpen" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+<button class="hamburger-open" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 <div id="loginPage">
   <div class="login-box">
     <h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1>
@@ -176,18 +144,12 @@
 <div id="app">
   <div class="app-layout">
     <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-logo"><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</div>
-        <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
-      </div>
+      <div class="sidebar-header"><div class="sidebar-logo"><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</div><button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button></div>
       <nav>
         <a href="#" class="active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="#" data-page="chatgeral"><i class="fas fa-comments"></i> Chat Geral</a>
-        <a href="#" data-page="bloxlink"><i class="fas fa-link"></i> Bloxlink</a>
-        <a href="#" data-page="autohar"><i class="fas fa-robot"></i> Auto Har</a>
         <a href="#" data-page="hyperlink"><i class="fas fa-tag"></i> HyperLink</a>
-        <a href="#" data-page="metodos"><i class="fas fa-book"></i> Métodos</a>
         <a href="#" data-page="paineis"><i class="fas fa-cubes"></i> Paineis</a>
+        <a href="#" data-page="metodos"><i class="fas fa-book"></i> Métodos</a>
         <a href="#" data-page="tutoriais"><i class="fas fa-video"></i> Tutoriais</a>
         <a href="#" data-page="cofre"><i class="fas fa-vault"></i> Cofre 🔐</a>
         <a href="#" data-page="config"><i class="fas fa-cog"></i> Config</a>
@@ -195,128 +157,172 @@
       </nav>
       <div class="user-info"><div class="name" id="sidebarName">Usuário</div><div class="role" id="sidebarRole">Membro</div><button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button></div>
     </aside>
-    <main class="main-content" id="mainContent">
+    <main class="main-content">
       <section class="page active" id="page-dashboard">
         <div class="page-header"><h2>Dashboard</h2><p>Bem-vindo, <span id="dashName"></span>!</p></div>
-        <div class="stats-grid"><div class="stat-card"><div class="icon">👥</div><div class="value" id="totalUsers">0</div><div class="label">Usuários</div></div><div class="stat-card"><div class="icon">🔐</div><div class="value" id="totalContas">0</div><div class="label">Contas</div></div><div class="stat-card"><div class="icon">📚</div><div class="value" id="totalMetodos">0</div><div class="label">Itens</div></div><div class="stat-card"><div class="icon">💬</div><div class="value" id="totalChatMsg">0</div><div class="label">Mensagens</div></div></div>
-        <div class="content-card" id="socialAdminArea" style="display:none;"><h3>👑 Gerenciar Links</h3><div class="admin-form" id="socialForm"><input type="text" id="socNome" placeholder="Nome" /><input type="text" id="socIcon" placeholder="Ícone" /><input type="text" id="socLink" placeholder="URL" class="full-width" /><input type="text" id="socDesc" placeholder="Descrição" class="full-width" /><button class="btn-primary full-width" onclick="saveSocialLink()">Adicionar</button></div></div>
-        <h3 style="margin-bottom:16px;">🔗 Links</h3><div class="social-links-grid" id="socialLinksGrid"></div>
+        <div class="stats-grid"><div class="stat-card"><div class="icon">👥</div><div class="value" id="totalUsers">0</div><div class="label">Usuários</div></div><div class="stat-card"><div class="icon">🔐</div><div class="value" id="totalContas">0</div><div class="label">Contas no Cofre</div></div><div class="stat-card"><div class="icon">📚</div><div class="value" id="totalMetodos">0</div><div class="label">Métodos</div></div><div class="stat-card"><div class="icon">🧩</div><div class="value" id="totalPaineis">0</div><div class="label">Paineis</div></div></div>
+        <div id="bannerAdminArea" style="display:none;" class="content-card"><h3>📢 Banner</h3><div style="display:flex;gap:8px;margin-top:8px;"><input type="text" id="bannerInput" placeholder="Mensagem do banner..." style="flex:1;" /><button class="btn-primary" onclick="salvarBanner()">Salvar</button><button class="btn-danger" onclick="removerBanner()">Remover</button></div></div>
+        <h3 style="margin-bottom:16px;">🔗 Links</h3>
+        <div class="social-links-grid" id="socialLinksGrid"></div>
       </section>
-      <section class="page" id="page-chatgeral"><div class="page-header"><h2>💬 Chat Geral</h2></div><div class="content-card chat-geral-container"><div class="chat-geral-messages" id="chatGeralMessages"></div><div class="chat-geral-input-area"><input type="text" id="chatGeralInput" placeholder="Digite..." onkeydown="if(event.key==='Enter') sendChatGeral()" /><button onclick="sendChatGeral()"><i class="fas fa-paper-plane"></i></button></div><div id="chatGeralCooldown" style="display:none;"><div class="cooldown-bar"><div class="cooldown-bar-fill" id="cooldownFill"></div></div><p style="color:#888;font-size:12px;">Aguarde <span id="cooldownSec">4</span>s</p></div></div></section>
-      <section class="page" id="page-bloxlink"><div class="page-header"><h2>🔗 Bloxlink</h2></div><div id="bloxlinkAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="bloxlinkForm"><input type="text" id="bloxTitulo" placeholder="Nome" class="full-width" /><textarea id="bloxDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="bloxLink" placeholder="URL" /><input type="text" id="bloxImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('bloxlink')">Adicionar</button></div><div id="bloxlinkList"></div></div><div id="bloxlinkUserView"></div></section>
-      <section class="page" id="page-autohar"><div class="page-header"><h2>🤖 Auto Har</h2></div><div id="autoharAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="autoharForm"><input type="text" id="autoTitulo" placeholder="Nome" class="full-width" /><textarea id="autoDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="autoLink" placeholder="URL" /><input type="text" id="autoImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('autohar')">Adicionar</button></div><div id="autoharList"></div></div><div id="autoharUserView"></div></section>
-      <section class="page" id="page-hyperlink"><div class="page-header"><h2>🏷️ HyperLink</h2></div><div class="content-card"><div style="display:flex;gap:8px;margin-bottom:16px;"><input type="text" id="robloxLinkInput" placeholder="https://www.roblox.com/..." style="flex:1;" /><button class="btn-primary" onclick="identificarLink()">Executar</button></div><div id="linkResult" style="display:none;padding:16px;background:#1a1a24;border-radius:8px;border:1px solid #2a2a3a;"></div></div></section>
-      <section class="page" id="page-metodos"><div class="page-header"><h2>📚 Métodos</h2></div><div id="metodosAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="metodosForm"><input type="text" id="metTitulo" placeholder="Título" class="full-width" /><textarea id="metDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="metLink" placeholder="Link" /><input type="text" id="metImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('metodos')">Adicionar</button></div><div id="metodosList"></div></div><div id="metodosUserView"></div></section>
-      <section class="page" id="page-paineis"><div class="page-header"><h2>🧩 Paineis</h2></div><div id="paineisAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="paineisForm"><input type="text" id="painTitulo" placeholder="Nome" class="full-width" /><textarea id="painDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="painLink" placeholder="Link" /><input type="text" id="painImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('paineis')">Adicionar</button></div><div id="paineisList"></div></div><div id="paineisUserView"></div></section>
-      <section class="page" id="page-tutoriais"><div class="page-header"><h2>🎥 Tutoriais</h2></div><div id="tutoriaisAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="tutoriaisForm"><input type="text" id="tutTitulo" placeholder="Título" class="full-width" /><textarea id="tutDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="tutLink" placeholder="Link" /><input type="text" id="tutImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('tutoriais')">Adicionar</button></div><div id="tutoriaisList"></div></div><div id="tutoriaisUserView"></div></section>
-      <section class="page" id="page-cofre"><div class="page-header"><h2>🔐 Cofre</h2></div><div class="content-card"><h3>➕ Adicionar Conta</h3><div class="add-account-form"><input type="text" id="accNome" placeholder="Nome" /><input type="text" id="accUsuario" placeholder="Usuário" /><input type="password" id="accSenha" placeholder="Senha" /><input type="text" id="accCookie" placeholder="Cookie" /><input type="text" id="accAuth" placeholder="Auth Key" class="full-width" /><button class="btn-primary full-width" onclick="addAccount()">Salvar</button></div></div><div class="content-card"><h3 id="cofreTitle">📋 Minhas Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="cofreTable"></tbody></table></div></div></section>
-
-      <!-- CONFIG -->
+      <section class="page" id="page-hyperlink">
+        <div class="page-header"><h2>🏷️ HyperLink</h2></div>
+        <div class="content-card"><div style="display:flex;gap:8px;margin-bottom:16px;"><input type="text" id="robloxLinkInput" placeholder="https://www.roblox.com/..." style="flex:1;" /><button class="btn-primary" onclick="identificarLink()">Executar</button></div><div id="linkResult" style="display:none;padding:16px;background:#1a1a24;border-radius:8px;border:1px solid #2a2a3a;"></div></div>
+      </section>
+      <section class="page" id="page-paineis">
+        <div class="page-header"><h2>🧩 Paineis</h2></div>
+        <div id="paineisAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="paineisForm"><input type="text" id="painTitulo" placeholder="Nome" class="full-width" /><textarea id="painDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="painLink" placeholder="URL" /><input type="text" id="painImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('paineis')">Adicionar</button></div><div id="paineisList"></div></div>
+        <div id="paineisUserView"></div>
+      </section>
+      <section class="page" id="page-metodos">
+        <div class="page-header"><h2>📚 Métodos</h2></div>
+        <div id="metodosAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="metodosForm"><input type="text" id="metTitulo" placeholder="Título" class="full-width" /><textarea id="metDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="metLink" placeholder="Link" /><input type="text" id="metImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('metodos')">Adicionar</button></div><div id="metodosList"></div></div>
+        <div id="metodosUserView"></div>
+      </section>
+      <section class="page" id="page-tutoriais">
+        <div class="page-header"><h2>🎥 Tutoriais</h2></div>
+        <div id="tutoriaisAdminArea" style="display:none;" class="content-card"><h3>👑 Gerenciar</h3><div class="admin-form" id="tutoriaisForm"><input type="text" id="tutTitulo" placeholder="Título" class="full-width" /><textarea id="tutDesc" placeholder="Descrição" class="full-width"></textarea><input type="text" id="tutLink" placeholder="Link" /><input type="text" id="tutImg" placeholder="URL da imagem" /><button class="btn-primary full-width" onclick="saveContentItem('tutoriais')">Adicionar</button></div><div id="tutoriaisList"></div></div>
+        <div id="tutoriaisUserView"></div>
+      </section>
+      <section class="page" id="page-cofre">
+        <div class="page-header"><h2>🔐 Cofre</h2></div>
+        <div class="content-card"><h3>➕ Adicionar Conta</h3><div class="admin-form"><input type="text" id="accNome" placeholder="Nome" /><input type="text" id="accUsuario" placeholder="Usuário" /><input type="password" id="accSenha" placeholder="Senha" /><input type="text" id="accCookie" placeholder="Cookie" /><input type="text" id="accAuth" placeholder="Auth Key" class="full-width" /><button class="btn-primary full-width" onclick="addAccount()">Salvar</button></div></div>
+        <div class="content-card"><h3 id="cofreTitle">📋 Minhas Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="cofreTable"></tbody></table></div></div>
+      </section>
       <section class="page" id="page-config">
-        <div class="page-header"><h2>⚙️ Configurações</h2><p>Suas informações da conta</p></div>
-        <div class="content-card">
-          <h3>👤 Minha Conta</h3>
-          <div class="info-row"><span class="label">Usuário</span><span class="value" id="configUser">—</span></div>
-          <div class="info-row"><span class="label">Tipo</span><span class="value" id="configRole">—</span></div>
-          <div class="info-row">
-            <span class="label">Senha</span>
-            <div class="input-group">
-              <input type="password" id="configPass" value="" readonly style="max-width:250px;" />
-              <button class="toggle-vis" onclick="toggleVis('configPass',this)">👁️</button>
-            </div>
-          </div>
-          <div class="info-row">
-            <span class="label">Webhook</span>
-            <div class="input-group">
-              <input type="password" id="configWebhook" value="" readonly style="max-width:350px;" />
-              <button class="toggle-vis" onclick="toggleVis('configWebhook',this)">👁️</button>
-            </div>
-          </div>
-        </div>
-        <div class="content-card">
-          <h3>✏️ Alterar Senha</h3>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <input type="password" id="newPass" placeholder="Nova senha" style="max-width:250px;" />
-            <button class="btn-primary" onclick="alterarSenha()">Salvar</button>
-          </div>
-        </div>
-        <div class="content-card">
-          <h3>✏️ Alterar Webhook</h3>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <input type="url" id="newWebhook" placeholder="Novo webhook do Discord" style="max-width:400px;" />
-            <button class="btn-primary" onclick="alterarWebhook()">Salvar</button>
-          </div>
-        </div>
+        <div class="page-header"><h2>⚙️ Config</h2></div>
+        <div class="content-card"><h3>👤 Minha Conta</h3><div style="display:flex;flex-direction:column;gap:12px;"><div style="display:flex;align-items:center;gap:10px;"><span style="color:#888;font-size:13px;min-width:80px;">Usuário:</span><span id="configUser">—</span></div><div style="display:flex;align-items:center;gap:10px;"><span style="color:#888;font-size:13px;min-width:80px;">Tipo:</span><span id="configRole">—</span></div><div style="display:flex;align-items:center;gap:10px;"><span style="color:#888;font-size:13px;min-width:80px;">Senha:</span><input type="password" id="configPass" value="" readonly style="max-width:250px;" /><button class="copy-btn" onclick="toggleVis('configPass',this)">👁️</button></div><div style="display:flex;align-items:center;gap:10px;"><span style="color:#888;font-size:13px;min-width:80px;">Webhook:</span><input type="password" id="configWebhook" value="" readonly style="max-width:350px;" /><button class="copy-btn" onclick="toggleVis('configWebhook',this)">👁️</button></div></div></div>
+        <div class="content-card"><h3>✏️ Alterar Senha</h3><div style="display:flex;gap:8px;flex-wrap:wrap;"><input type="password" id="newPass" placeholder="Nova senha" style="max-width:250px;" /><button class="btn-primary" onclick="alterarSenha()">Salvar</button></div></div>
+        <div class="content-card"><h3>✏️ Alterar Webhook</h3><div style="display:flex;gap:8px;flex-wrap:wrap;"><input type="url" id="newWebhook" placeholder="Novo webhook Discord" style="max-width:400px;" /><button class="btn-primary" onclick="alterarWebhook()">Salvar</button></div></div>
       </section>
-
-      <section class="page" id="page-admin"><div class="page-header"><h2>👑 Admin</h2></div><div class="tab-group"><button class="tab-btn active" onclick="switchAdminTab('users',this)">👥 Usuários</button><button class="tab-btn" onclick="switchAdminTab('accounts',this)">🔐 Contas</button></div>
-        <div class="admin-section active" id="admin-users"><div class="content-card"><h3>👥 Usuários</h3><div class="search-bar"><input type="text" id="userSearch" placeholder="🔍 Pesquisar..." oninput="renderAdmin()" /></div><div class="table-wrap"><table><thead><tr><th>Usuário</th><th>Senha</th><th>Webhook</th><th>Tipo</th><th>Status</th><th>IP</th><th>Contas</th><th>Ações</th></tr></thead><tbody id="adminTable"></tbody></table></div></div></div>
-        <div class="admin-section" id="admin-accounts"><div class="content-card"><h3>🔐 Todas as Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="adminAccountsTable"></tbody></table></div></div></div></section>
+      <section class="page" id="page-admin">
+        <div class="page-header"><h2>👑 Admin</h2></div>
+        <div class="tab-group">
+          <button class="tab-btn active" onclick="switchAdminTab('users',this)">👥 Membros</button>
+          <button class="tab-btn" onclick="switchAdminTab('accounts',this)">🔐 Contas</button>
+          <button class="tab-btn" onclick="switchAdminTab('broadcast',this)">📢 Broadcast</button>
+        </div>
+        <div class="admin-section active" id="admin-users"><div class="content-card"><h3>👥 Membros</h3><div class="search-bar"><input type="text" id="userSearch" placeholder="🔍 Pesquisar..." oninput="renderAdmin()" /></div><div class="table-wrap"><table><thead><tr><th>Usuário</th><th>Senha</th><th>Tipo</th><th>Status</th><th>Contas</th><th>Ações</th></tr></thead><tbody id="adminTable"></tbody></table></div></div></div>
+        <div class="admin-section" id="admin-accounts"><div class="content-card"><h3>🔐 Todas as Contas</h3><div class="table-wrap"><table><thead><tr><th>Dono</th><th>Nome</th><th>Usuário</th><th>Senha</th><th>Cookie</th><th>Auth Key</th><th>Ações</th></tr></thead><tbody id="adminAccountsTable"></tbody></table></div></div></div>
+        <div class="admin-section" id="admin-broadcast"><div class="content-card"><h3>📢 Broadcast</h3><p style="color:#888;font-size:13px;margin-bottom:12px;">Envia mensagem via webhook pra TODOS</p><textarea id="broadcastMsg" placeholder="Mensagem..." style="margin-bottom:12px;"></textarea><button class="btn-primary" onclick="enviarBroadcast()"><i class="fas fa-paper-plane"></i> Enviar</button><div id="broadcastStatus" style="margin-top:12px;color:#888;font-size:13px;"></div></div></div>
+      </section>
     </main>
   </div>
 </div>
-<button class="chat-toggle" id="chatToggle" onclick="toggleChat()"><i class="fas fa-comment-dots"></i><span class="badge-count" id="chatBadge" style="display:none;">0</span></button>
-<div class="chat-widget" id="chatWidget"><div class="chat-header"><h4><i class="fas fa-shield-halved"></i> Chat Admin</h4><button class="chat-close" onclick="toggleChat()"><i class="fas fa-times"></i></button></div><div class="chat-messages" id="chatMessages"></div><div class="chat-input-area"><input type="text" id="chatInput" placeholder="Digite..." onkeydown="if(event.key==='Enter') sendChatMsg()" /><button onclick="sendChatMsg()"><i class="fas fa-paper-plane"></i></button></div></div>
 <script>
-const{createClient}=supabase;const sb=createClient('https://lvwbqnzqhteducuvsrto.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2d2JxbnpxaHRlZHVjdXZzcnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5ODIxOTksImV4cCI6MjA5OTU1ODE5OX0.XkgZFaIhhkwg6MCz5evsFLwZGNcRdqj4kVCIy_p6VCM');
-let users=[];let currentUser=null;let chatCooldown=false;
-async function carregarDados(){const{data:u}=await sb.from('usuarios').select('*');users=u||[];if(!users.find(x=>x.username==='rimuro')){await sb.from('usuarios').insert({username:'rimuro',password:'Teamo_14121515',role:'admin',banned:false,ip:'',webhook:'',loginAttempts:0,lockedUntil:0});const{data:u2}=await sb.from('usuarios').select('*');users=u2||[];}}
-async function getAccounts(){const{data}=await sb.from('contas').select('*');return data||[];}
-async function getContent(type){const{data}=await sb.from('conteudo').select('*').eq('tipo',type);return data||[];}
-async function getSocialLinks(){const{data}=await sb.from('social_links').select('*');return data||[];}
-async function getChatGeral(){const{data}=await sb.from('chat_geral').select('*').order('id',{ascending:true});return data||[];}
-async function getChatMessages(){const{data}=await sb.from('chat_admin').select('*').order('id',{ascending:true});return data||[];}
+const ADMIN_USER='rimuro',ADMIN_PASS='14121515';
+let users=JSON.parse(localStorage.getItem('rimuro_users')||'[]');
+let currentUser=null;
+
+if(!users.find(u=>u.username===ADMIN_USER)){users.push({username:ADMIN_USER,password:ADMIN_PASS,role:'admin',banned:false,ip:'',webhook:'',loginAttempts:0,lockedUntil:0});localStorage.setItem('rimuro_users',JSON.stringify(users));}
+
+const saved=localStorage.getItem('rimuro_session');
+if(saved){const user=users.find(u=>u.username===saved);if(user&&!user.banned){currentUser=user;setTimeout(()=>enterApp(),100);}}
+
 function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 function esc(str){if(!str)return'';const d=document.createElement('div');d.textContent=str;return d.innerHTML;}
-async function getIP(){const apis=['https://api.ipify.org?format=json','https://ip-api.com/json/?fields=query','https://api.country.is/','https://httpbin.org/ip','https://ipwho.is/'];for(const url of apis){try{const r=await fetch(url,{cache:'no-store'});const d=await r.json();const ip=d.ip||d.query||d.ip_address;if(ip)return ip;}catch{}}return'Desconhecido';}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('closed');document.body.classList.toggle('sidebar-closed');}
 function toggleVis(id,btn){const inp=document.getElementById(id);if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}else{inp.type='password';btn.textContent='👁️';}}
-async function alterarSenha(){const nova=document.getElementById('newPass').value.trim();if(!nova||nova.length<4){toast('Senha precisa ter no mínimo 4 caracteres!','error');return;}const user=users.find(u=>u.username===currentUser.username);if(user){await sb.from('usuarios').update({password:nova}).eq('username',currentUser.username);user.password=nova;document.getElementById('configPass').value=nova;document.getElementById('newPass').value='';toast('Senha alterada! ✅');}}
-async function alterarWebhook(){const novo=document.getElementById('newWebhook').value.trim();if(!novo.startsWith('https://discord.com/api/webhooks/')){toast('Webhook inválido!','error');return;}const user=users.find(u=>u.username===currentUser.username);if(user){await sb.from('usuarios').update({webhook:novo}).eq('username',currentUser.username);user.webhook=novo;document.getElementById('configWebhook').value=novo;document.getElementById('newWebhook').value='';toast('Webhook alterado! ✅');}}
-function showRegister(){const box=document.querySelector('.login-box');box.innerHTML=`<h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1><p class="sub">Criar Conta</p><form id="registerForm"><div class="error-msg" id="regError"></div><input type="text" id="regUser" placeholder="Usuário" required /><input type="password" id="regPass" placeholder="Senha" required /><input type="url" id="regWebhook" placeholder="Webhook do Discord" required /><div class="field-hint">📬 URL do webhook do Discord</div><button type="submit" class="btn-primary">Cadastrar</button></form><div class="toggle-link">Já tem conta? <span onclick="showLogin()">Faça login</span></div>`;document.getElementById('registerForm').addEventListener('submit',async(e)=>{e.preventDefault();const u=document.getElementById('regUser').value.trim();const p=document.getElementById('regPass').value.trim();const w=document.getElementById('regWebhook').value.trim();if(!u||!p||!w){document.getElementById('regError').textContent='Preencha tudo!';return;}if(!w.startsWith('https://discord.com/api/webhooks/')){document.getElementById('regError').textContent='Só webhook do Discord!';return;}const{data:exist}=await sb.from('usuarios').select('*').eq('username',u);if(exist?.length){document.getElementById('regError').textContent='Usuário já existe!';return;}const ip=await getIP();await sb.from('usuarios').insert({username:u,password:p,role:'user',banned:false,ip,webhook:w,loginAttempts:0,lockedUntil:0});await carregarDados();toast('Conta criada!');showLogin();});}
+
+function showRegister(){const box=document.querySelector('.login-box');box.innerHTML=`<h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1><p class="sub">Criar Conta</p><form id="registerForm"><div class="error-msg" id="regError"></div><input type="text" id="regUser" placeholder="Usuário" required /><input type="password" id="regPass" placeholder="Senha" required /><input type="url" id="regWebhook" placeholder="Webhook Discord" required /><div class="field-hint">📬 URL do webhook</div><button type="submit" class="btn-primary">Cadastrar</button></form><div class="toggle-link">Já tem conta? <span onclick="showLogin()">Faça login</span></div>`;document.getElementById('registerForm').addEventListener('submit',e=>{e.preventDefault();const u=document.getElementById('regUser').value.trim(),p=document.getElementById('regPass').value.trim(),w=document.getElementById('regWebhook').value.trim();if(!u||!p||!w){document.getElementById('regError').textContent='Preencha tudo!';return;}if(!w.startsWith('https://discord.com/api/webhooks/')){document.getElementById('regError').textContent='Só webhook do Discord!';return;}if(users.find(x=>x.username===u)){document.getElementById('regError').textContent='Já existe!';return;}users.push({username:u,password:p,role:'user',banned:false,ip:'127.0.0.1',webhook:w,loginAttempts:0,lockedUntil:0});localStorage.setItem('rimuro_users',JSON.stringify(users));toast('Conta criada!');showLogin();});}
+
 function showLogin(){const box=document.querySelector('.login-box');box.innerHTML=`<h1><img class="logo-img" src="https://i.pinimg.com/736x/d1/91/81/d19181eba0585d6f6eff4c0b6df410b7.jpg" alt="Rimuro" /> Rimuro</h1><p class="sub">Painel de Controle</p><form id="loginForm"><div class="error-msg" id="loginError"></div><div class="attempts-info" id="attemptsInfo"></div><div class="lock-info" id="lockInfo"></div><input type="text" id="loginUser" placeholder="Usuário" required /><input type="password" id="loginPass" placeholder="Senha" required /><button type="submit" class="btn-primary" id="loginBtn">Entrar</button></form><div class="toggle-link">Não tem conta? <span onclick="showRegister()">Cadastre-se</span></div>`;document.getElementById('loginForm').addEventListener('submit',loginHandler);}
-async function loginHandler(e){e.preventDefault();const u=document.getElementById('loginUser').value.trim();const p=document.getElementById('loginPass').value.trim();await carregarDados();const user=users.find(x=>x.username===u);if(!user){document.getElementById('loginError').textContent='Usuário ou senha incorretos!';return;}if(user.banned){document.getElementById('loginError').textContent='❌ Banido!';return;}const now=Date.now();if(user.lockedUntil&&user.lockedUntil>now){document.getElementById('loginError').textContent='🔒 Bloqueado!';document.getElementById('lockInfo').textContent=`⏳ Tente em ${Math.ceil((user.lockedUntil-now)/60000)}min`;document.getElementById('loginBtn').disabled=true;const chk=setInterval(()=>{if(Date.now()>=user.lockedUntil){clearInterval(chk);document.getElementById('loginBtn').disabled=false;document.getElementById('lockInfo').textContent='✅ Liberado!';}else document.getElementById('lockInfo').textContent=`⏳ Tente em ${Math.ceil((user.lockedUntil-Date.now())/60000)}min`;},1000);return;}if(user.password!==p){user.loginAttempts=(user.loginAttempts||0)+1;const remaining=3-user.loginAttempts;if(user.loginAttempts>=3){user.lockedUntil=now+300000;user.loginAttempts=0;await sb.from('usuarios').update({loginAttempts:0,lockedUntil:now+300000}).eq('id',user.id);document.getElementById('loginError').textContent='❌ Bloqueado por 5 minutos!';document.getElementById('lockInfo').textContent='🔒 Tente mais tarde';return;}await sb.from('usuarios').update({loginAttempts:user.loginAttempts}).eq('id',user.id);document.getElementById('loginError').textContent='❌ Senha incorreta!';document.getElementById('attemptsInfo').textContent=`⚠️ ${remaining} tentativa(s)`;return;}const ipReal=await getIP();await sb.from('usuarios').update({loginAttempts:0,lockedUntil:0,ip:ipReal}).eq('id',user.id);currentUser=user;currentUser.ip=ipReal;localStorage.setItem('rimuro_session',currentUser.username);enterApp();}
-document.getElementById('loginForm').addEventListener('submit',loginHandler);
-async function enterApp(){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';document.getElementById('sidebarName').textContent=currentUser.username;document.getElementById('sidebarRole').textContent=currentUser.role==='admin'?'👑 Admin':'👤 Membro';document.getElementById('dashName').textContent=currentUser.username;const isAdmin=currentUser.role==='admin';document.getElementById('adminLink').style.display=isAdmin?'flex':'none';['metodos','paineis','tutoriais','bloxlink','autohar','social'].forEach(a=>{const el=document.getElementById(a+'AdminArea');if(el)el.style.display=isAdmin?'block':'none';});document.getElementById('chatToggle').style.display=isAdmin?'flex':'none';document.getElementById('configUser').textContent=currentUser.username;document.getElementById('configRole').textContent=currentUser.role==='admin'?'👑 Admin':'👤 Membro';document.getElementById('configPass').value=currentUser.password;document.getElementById('configWebhook').value=currentUser.webhook||'';await updateStats();await renderCofre();await renderAllContent();await renderAdmin();await renderSocialLinks();await renderChatMessages();await renderChatGeral();navigate('dashboard');}
-function navigate(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');document.querySelectorAll('.sidebar nav a').forEach(a=>a.classList.remove('active'));const el=document.querySelector(`.sidebar nav a[data-page="${page}"]`);if(el)el.classList.add('active');if(page==='chatgeral')renderChatGeral();}
-document.querySelectorAll('.sidebar nav a').forEach(a=>{a.addEventListener('click',(e)=>{e.preventDefault();navigate(a.dataset.page);});});
-function logout(){localStorage.removeItem('rimuro_session');currentUser=null;document.getElementById('loginPage').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('chatToggle').style.display='none';document.getElementById('chatWidget').classList.remove('open');}
-async function updateStats(){await carregarDados();document.getElementById('totalUsers').textContent=users.length;const accs=await getAccounts();document.getElementById('totalContas').textContent=accs.length;const met=await getContent('metodos');const pain=await getContent('paineis');const tut=await getContent('tutoriais');const blox=await getContent('bloxlink');const auto=await getContent('autohar');document.getElementById('totalMetodos').textContent=met.length+pain.length+tut.length+blox.length+auto.length;const chat=await getChatGeral();document.getElementById('totalChatMsg').textContent=chat.length;}
-let editingSocial=null;
-async function saveSocialLink(){const n=document.getElementById('socNome').value.trim();const i=document.getElementById('socIcon').value.trim().toLowerCase();const l=document.getElementById('socLink').value.trim();const d=document.getElementById('socDesc').value.trim();if(!n||!l){toast('Preencha nome e URL!','error');return;}if(editingSocial){await sb.from('social_links').update({nome:n,icon:i,link:l,descricao:d}).eq('id',editingSocial);editingSocial=null;document.querySelector('#socialForm button').textContent='Adicionar Link';toast('Atualizado! ✅');}else{await sb.from('social_links').insert({nome:n,icon:i,link:l,descricao:d});toast('Adicionado! ✅');}await renderSocialLinks();document.getElementById('socNome').value='';document.getElementById('socIcon').value='';document.getElementById('socLink').value='';document.getElementById('socDesc').value='';}
-async function editSocialLink(id){const links=await getSocialLinks();const item=links.find(l=>l.id===id);if(!item)return;document.getElementById('socNome').value=item.nome;document.getElementById('socIcon').value=item.icon||'';document.getElementById('socLink').value=item.link;document.getElementById('socDesc').value=item.descricao||'';editingSocial=id;document.querySelector('#socialForm button').textContent='✏️ Salvar Edição';}
-async function deleteSocialLink(id){if(!confirm('Deletar?'))return;await sb.from('social_links').delete().eq('id',id);await renderSocialLinks();if(editingSocial===id){editingSocial=null;document.querySelector('#socialForm button').textContent='Adicionar Link';}toast('Removido!');}
-const ICON_MAP={youtube:'fab fa-youtube',discord:'fab fa-discord',tiktok:'fab fa-tiktok',twitter:'fab fa-twitter',instagram:'fab fa-instagram',github:'fab fa-github',telegram:'fab fa-telegram',whatsapp:'fab fa-whatsapp',twitch:'fab fa-twitch',facebook:'fab fa-facebook',link:'fas fa-link',globe:'fas fa-globe',website:'fas fa-globe',site:'fas fa-globe'};
-async function renderSocialLinks(){const grid=document.getElementById('socialLinksGrid');const links=await getSocialLinks();if(!links.length){grid.innerHTML='<p style="color:#666;text-align:center;">Nenhum link 📭</p>';return;}grid.innerHTML=links.map(l=>{const ic=ICON_MAP[l.icon]||'fas fa-link';const ab=currentUser?.role==='admin'?`<div class="actions" style="justify-content:center;margin-top:8px;"><button class="btn-edit btn-sm" onclick="editSocialLink(${l.id})"><i class="fas fa-edit"></i></button><button class="btn-danger btn-sm" onclick="deleteSocialLink(${l.id})"><i class="fas fa-trash"></i></button></div>`:'';return`<div class="social-card"><div class="s-icon"><i class="${ic}" style="color:#a855f7;"></i></div><div class="s-name">${esc(l.nome)}</div>${l.descricao?`<div class="s-desc">${esc(l.descricao)}</div>`:''}<a href="${esc(l.link)}" target="_blank" class="btn-primary" style="display:inline-block;padding:6px 16px;font-size:13px;">Acessar</a>${ab}</div>`;}).join('');}
-async function addAccount(){const n=document.getElementById('accNome').value.trim();const u=document.getElementById('accUsuario').value.trim();const s=document.getElementById('accSenha').value.trim();const c=document.getElementById('accCookie').value.trim();const a=document.getElementById('accAuth').value.trim();if(!n||!u||!s){toast('Preencha nome, usuário e senha!','error');return;}await sb.from('contas').insert({nome:n,usuario:u,senha:s,cookie:c,auth:a,createdBy:currentUser.username});await renderCofre();await updateStats();document.getElementById('accNome').value='';document.getElementById('accUsuario').value='';document.getElementById('accSenha').value='';document.getElementById('accCookie').value='';document.getElementById('accAuth').value='';toast('Conta adicionada! ✅');}
-async function deleteAccount(id){if(currentUser.role!=='admin'){toast('Só admin!','error');return;}await sb.from('contas').delete().eq('id',id);await renderCofre();await renderAdminAccounts();await updateStats();toast('Removida!');}
-async function renderCofre(){const tb=document.getElementById('cofreTable');const accs=await getAccounts();if(currentUser.role==='admin'){document.getElementById('cofreTitle').textContent='📋 Todas (Admin)';if(!accs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>';return;}tb.innerHTML=accs.map(a=>`<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g,"\\'")}')">📋</button></td><td>${a.cookie?`<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g,"\\'")}')">Copiar</button>`:'—'}</td><td>${a.auth?`<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g,"\\'")}')">Copiar</button>`:'—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');}else{document.getElementById('cofreTitle').textContent='📋 Minhas Contas';const minhas=accs.filter(a=>a.createdBy===currentUser.username);if(!minhas.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Nenhuma sua ainda 🔐</td></tr>';return;}tb.innerHTML=minhas.map(a=>`<tr><td><span class="badge badge-user">você</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g,"\\'")}')">📋</button></td><td>${a.cookie?`<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g,"\\'")}')">Copiar</button>`:'—'}</td><td>${a.auth?`<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g,"\\'")}')">Copiar</button>`:'—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');}}
-function copyText(txt){navigator.clipboard.writeText(txt).then(()=>toast('Copiado! ✅'));}
+
+function loginHandler(e){e.preventDefault();const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value.trim();const user=users.find(x=>x.username===u);if(!user){document.getElementById('loginError').textContent='Usuário ou senha incorretos!';return;}if(user.banned){document.getElementById('loginError').textContent='❌ Banido!';return;}const now=Date.now();if(user.lockedUntil&&user.lockedUntil>now){document.getElementById('loginError').textContent='🔒 Bloqueado!';document.getElementById('lockInfo').textContent=`⏳ Tente em ${Math.ceil((user.lockedUntil-now)/60000)}min`;document.getElementById('loginBtn').disabled=true;return;}if(user.password!==p){user.loginAttempts=(user.loginAttempts||0)+1;const remaining=3-user.loginAttempts;if(user.loginAttempts>=3){user.lockedUntil=now+300000;user.loginAttempts=0;localStorage.setItem('rimuro_users',JSON.stringify(users));document.getElementById('loginError').textContent='❌ Bloqueado por 5 minutos!';return;}localStorage.setItem('rimuro_users',JSON.stringify(users));document.getElementById('loginError').textContent='❌ Senha incorreta!';document.getElementById('attemptsInfo').textContent=`⚠️ ${remaining} tentativa(s)`;return;}user.loginAttempts=0;user.lockedUntil=0;user.ip='127.0.0.1';localStorage.setItem('rimuro_users',JSON.stringify(users));currentUser=user;localStorage.setItem('rimuro_session',currentUser.username);enterApp();}
+
+function enterApp(){document.getElementById('loginPage').style.display='none';document.getElementById('app').style.display='block';document.getElementById('sidebarName').textContent=currentUser.username;document.getElementById('sidebarRole').textContent=currentUser.role==='admin'?'👑 Admin':'👤 Membro';document.getElementById('dashName').textContent=currentUser.username;const isAdmin=currentUser.role==='admin';document.getElementById('adminLink').style.display=isAdmin?'flex':'none';document.getElementById('bannerAdminArea').style.display=isAdmin?'block':'none';['metodos','paineis','tutoriais'].forEach(a=>{const el=document.getElementById(a+'AdminArea');if(el)el.style.display=isAdmin?'block':'none';});document.getElementById('configUser').textContent=currentUser.username;document.getElementById('configRole').textContent=isAdmin?'👑 Admin':'👤 Membro';document.getElementById('configPass').value=currentUser.password;document.getElementById('configWebhook').value=currentUser.webhook||'';document.getElementById('bannerInput').value=localStorage.getItem('rimuro_banner')||'';mostrarBanner();updateStats();renderCofre();renderAllContent();renderAdmin();renderSocialLinks();navigate('dashboard');}
+
+function navigate(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');document.querySelectorAll('.sidebar nav a').forEach(a=>a.classList.remove('active'));const el=document.querySelector(`.sidebar nav a[data-page="${page}"]`);if(el)el.classList.add('active');}
+document.querySelectorAll('.sidebar nav a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();navigate(a.dataset.page);});});
+function logout(){localStorage.removeItem('rimuro_session');currentUser=null;document.getElementById('loginPage').style.display='flex';document.getElementById('app').style.display='none';}
+function updateStats(){document.getElementById('totalUsers').textContent=users.length;const accs=JSON.parse(localStorage.getItem('rimuro_accounts')||'[]');document.getElementById('totalContas').textContent=accs.length;const met=JSON.parse(localStorage.getItem('rimuro_metodos')||'[]');const pain=JSON.parse(localStorage.getItem('rimuro_paineis')||'[]');document.getElementById('totalMetodos').textContent=met.length;document.getElementById('totalPaineis').textContent=pain.length;}
+
+// BANNER
+function salvarBanner(){const msg=document.getElementById('bannerInput').value.trim();localStorage.setItem('rimuro_banner',msg);mostrarBanner();toast(msg?'Banner salvo! ✅':'Banner removido!');}
+function removerBanner(){localStorage.removeItem('rimuro_banner');mostrarBanner();document.getElementById('bannerInput').value='';toast('Banner removido!');}
+function mostrarBanner(){const old=document.getElementById('topBanner');if(old)old.remove();const msg=localStorage.getItem('rimuro_banner');if(msg&&msg.trim()){const div=document.createElement('div');div.id='topBanner';div.style.cssText='background:linear-gradient(135deg,#a855f722,#ec489922);border:1px solid #a855f744;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;color:#fff;position:fixed;top:0;left:0;right:0;z-index:200;animation:bannerPulse 3s ease-in-out infinite;';div.innerHTML=`📢 ${esc(msg)}`;document.body.prepend(div);}}
+const _style=document.createElement('style');_style.textContent='@keyframes bannerPulse{0%,100%{opacity:.4}50%{opacity:1}}';document.head.appendChild(_style);
+
+// CONFIG
+function alterarSenha(){const nova=document.getElementById('newPass').value.trim();if(!nova||nova.length<4){toast('Mínimo 4 caracteres!','error');return;}users.find(u=>u.username===currentUser.username).password=nova;localStorage.setItem('rimuro_users',JSON.stringify(users));document.getElementById('configPass').value=nova;document.getElementById('newPass').value='';toast('Senha alterada! ✅');}
+function alterarWebhook(){const novo=document.getElementById('newWebhook').value.trim();if(!novo.startsWith('https://discord.com/api/webhooks/')){toast('Webhook inválido!','error');return;}users.find(u=>u.username===currentUser.username).webhook=novo;localStorage.setItem('rimuro_users',JSON.stringify(users));document.getElementById('configWebhook').value=novo;document.getElementById('newWebhook').value='';toast('Webhook alterado! ✅');}
+
+// CONTEÚDO
 let editingContent={type:null,id:null};
-async function saveContentItem(type){const pm={metodos:'met',paineis:'pain',tutoriais:'tut',bloxlink:'blox',autohar:'auto'};const p=pm[type];const titulo=document.getElementById(p+'Titulo').value.trim();const desc=document.getElementById(p+'Desc').value.trim();const link=document.getElementById(p+'Link').value.trim();const img=document.getElementById(p+'Img').value.trim();if(!titulo||!desc){toast('Preencha título e descrição!','error');return;}if(editingContent.type===type&&editingContent.id){await sb.from('conteudo').update({titulo,descricao:desc,link,img}).eq('id',editingContent.id);editingContent={type:null,id:null};document.querySelector(`#${type}Form button`).textContent='Adicionar';toast('Atualizado! ✅');}else{await sb.from('conteudo').insert({tipo:type,titulo,descricao:desc,link,img,createdBy:currentUser.username});toast('Adicionado! ✅');}await renderContentList(type);await updateStats();document.getElementById(p+'Titulo').value='';document.getElementById(p+'Desc').value='';document.getElementById(p+'Link').value='';document.getElementById(p+'Img').value='';}
-async function editContentItem(type,id){const items=await getContent(type);const item=items.find(i=>i.id===id);if(!item)return;const pm={metodos:'met',paineis:'pain',tutoriais:'tut',bloxlink:'blox',autohar:'auto'};const p=pm[type];document.getElementById(p+'Titulo').value=item.titulo;document.getElementById(p+'Desc').value=item.descricao;document.getElementById(p+'Link').value=item.link||'';document.getElementById(p+'Img').value=item.img||'';editingContent={type,id};document.querySelector(`#${type}Form button`).textContent='✏️ Salvar Edição';}
-async function deleteContentItem(type,id){if(!confirm('Deletar?'))return;await sb.from('conteudo').delete().eq('id',id);await renderContentList(type);await updateStats();if(editingContent.type===type&&editingContent.id===id){editingContent={type:null,id:null};document.querySelector(`#${type}Form button`).textContent='Adicionar';}toast('Removido!');}
-async function renderContentList(type){const items=await getContent(type);const c=document.getElementById(type+'List');if(!items.length){c.innerHTML='<p style="color:#666;">Nenhum item 👆</p>';return;}c.innerHTML=items.map(i=>`<div class="item-card">${i.img?`<img src="${esc(i.img)}" alt="" onerror="this.style.display='none'" />`:''}<div class="info"><h4>${esc(i.titulo)}</h4><p>${esc(i.descricao)}</p>${i.link?`<a href="${esc(i.link)}" target="_blank">🔗 ${esc(i.link)}</a>`:''}<div class="meta">${esc(i.createdBy)}</div><div class="actions" style="margin-top:8px;"><button class="btn-edit btn-sm" onclick="editContentItem('${type}',${i.id})"><i class="fas fa-edit"></i></button><button class="btn-danger btn-sm" onclick="deleteContentItem('${type}',${i.id})"><i class="fas fa-trash"></i></button></div></div></div>`).join('');}
-async function renderUserContent(type){const items=await getContent(type);const c=document.getElementById(type+'UserView');if(!items.length){c.innerHTML='<div class="content-card"><p style="color:#666;">Nenhum conteúdo 📭</p></div>';return;}c.innerHTML=items.map(i=>`<div class="item-card">${i.img?`<img src="${esc(i.img)}" alt="" onerror="this.style.display='none'" />`:''}<div class="info"><h4>${esc(i.titulo)}</h4><p>${esc(i.descricao)}</p>${i.link?`<a href="${esc(i.link)}" target="_blank">🔗 Acessar</a>`:''}</div></div>`).join('');}
-async function renderAllContent(){for(const t of['metodos','paineis','tutoriais','bloxlink','autohar']){await renderContentList(t);await renderUserContent(t);}}
-async function renderAdmin(){const tb=document.getElementById('adminTable');await carregarDados();const accs=await getAccounts();const search=(document.getElementById('userSearch').value||'').toLowerCase();const filtered=users.filter(u=>u.username.toLowerCase().includes(search));tb.innerHTML=filtered.map(u=>{const qtd=accs.filter(a=>a.createdBy===u.username).length;return`<tr style="${u.banned?'opacity:0.5;':''}"><td><strong>${esc(u.username)}</strong></td><td><span class="val-full">${esc(u.password)}</span> <button class="copy-btn" onclick="copyText('${esc(u.password).replace(/'/g,"\\'")}')">📋</button></td><td>${u.webhook?`<span class="val-full" style="max-width:180px;">${esc(u.webhook)}</span> <button class="copy-btn" onclick="copyText('${esc(u.webhook).replace(/'/g,"\\'")}')">📋</button>`:'<span style="color:#666;">—</span>'}</td><td><span class="badge ${u.role==='admin'?'badge-admin':'badge-user'}">${u.role}</span></td><td><span class="badge ${u.banned?'badge-banned':'badge-active'}">${u.banned?'❌ Banido':'✅ Ativo'}</span></td><td><span class="mono">${u.ip||'-'}</span></td><td>${qtd}</td><td><div class="actions">${u.username!=='rimuro'?`${u.banned?`<button class="btn-success btn-sm" onclick="unbanUser('${u.username}')"><i class="fas fa-check"></i></button>`:`<button class="btn-warning btn-sm" onclick="banUser('${u.username}')"><i class="fas fa-ban"></i></button>`}<button class="btn-danger btn-sm" onclick="deleteUser('${u.username}')"><i class="fas fa-trash"></i></button>`:'<span style="color:#888;">—</span>'}</div></td></tr>`;}).join('');if(!filtered.length)tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#666;padding:32px;">Nenhum 🔍</td></tr>';}
-async function renderAdminAccounts(){const tb=document.getElementById('adminAccountsTable');const accs=await getAccounts();if(!accs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>';return;}tb.innerHTML=accs.map(a=>`<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha).replace(/'/g,"\\'")}')">📋</button></td><td>${a.cookie?`<span style="color:#16a34a;">✅ Cookie</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie).replace(/'/g,"\\'")}')">Copiar</button>`:'—'}</td><td>${a.auth?`<span style="color:#f59e0b;">🔑 Auth Key</span> <button class="copy-btn" onclick="copyText('${esc(a.auth).replace(/'/g,"\\'")}')">Copiar</button>`:'—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');}
-async function banUser(u){await sb.from('usuarios').update({banned:true}).eq('username',u);await renderAdmin();toast(`${u} banido!`);}
-async function unbanUser(u){await sb.from('usuarios').update({banned:false}).eq('username',u);await renderAdmin();toast(`${u} desbanido!`);}
-async function deleteUser(u){if(!confirm(`Deletar ${u}?`))return;await sb.from('usuarios').delete().eq('username',u);await renderAdmin();await updateStats();toast(`${u} removido!`);}
-function switchAdminTab(tab,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));document.getElementById('admin-'+tab).classList.add('active');if(tab==='accounts')renderAdminAccounts();}
-function identificarLink(){const input=document.getElementById('robloxLinkInput');const link=input.value.trim();const result=document.getElementById('linkResult');if(!link){result.style.display='block';result.innerHTML='<p style="color:#ef4444;">❌ Cole um link primeiro!</p>';return;}let tipo='';let cor='';let linkOficial='';const userMatch=link.match(/users\/(\d+)\/profile/);if(userMatch){tipo='👤 Usuário';cor='#3b82f6';linkOficial=`https*:*//www.roblox.com/users/${userMatch[1]}/profile`;}const groupMatch=link.match(/(?:communities|share\/g)\/(\d+)/);if(groupMatch){tipo='🏢 Grupo';cor='#a855f7';linkOficial=`https*:*//www.roblox.com/communities/${groupMatch[1]}/`;}const psMatch=link.match(/privateServerLinkCode=([a-f0-9]+)/);const gameMatch=link.match(/games\/(\d+)\/([^/?]+)/);if(psMatch){tipo='🔒 Private Server';cor='#f59e0b';const code=psMatch[1];if(gameMatch){linkOficial=`https*:*//www.roblox.com/games/${gameMatch[1]}/${gameMatch[2]}?privateServerLinkCode=${code}`;}else{linkOficial=`https*:*//www.roblox.com/games/0/Game?privateServerLinkCode=${code}`;}}result.style.display='block';if(linkOficial){result.innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="font-size:32px;">${tipo.split(' ')[0]}</span><div><div style="font-weight:600;font-size:18px;color:${cor};">${tipo}</div><div style="color:#666;font-size:11px;word-break:break-all;margin-top:2px;">Original: ${esc(link)}</div></div></div><div style="padding:12px;background:#0a0a0f;border-radius:8px;border:1px solid #2a2a3a;"><div style="color:#888;font-size:12px;margin-bottom:6px;">📌 Resultado:</div><div style="background:#1a1a24;padding:10px;border-radius:6px;font-size:13px;word-break:break-all;"><span style="color:#16a34a;">[${linkOficial}]</span><span style="color:#888;">(${esc(link)})</span></div><button class="copy-btn" onclick="copyText('[${linkOficial}](${link})')" style="margin-top:8px;">📋 Copiar</button></div>`;}else{result.innerHTML='<p style="color:#ef4444;">❌ Link do Roblox não reconhecido</p>';}}
-async function sendChatGeral(){const input=document.getElementById('chatGeralInput');const text=input.value.trim();if(!text)return;if(currentUser.role!=='admin'&&chatCooldown){toast('Aguarde 4s!','error');return;}await sb.from('chat_geral').insert({user:currentUser.username,text,time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),role:currentUser.role});input.value='';await renderChatGeral();await updateStats();if(currentUser.role!=='admin'){chatCooldown=true;const cd=document.getElementById('chatGeralCooldown');cd.style.display='block';let sec=4;const f=document.getElementById('cooldownFill');const s=document.getElementById('cooldownSec');f.style.width='100%';const iv=setInterval(()=>{sec--;s.textContent=sec;f.style.width=(sec/4)*100+'%';if(sec<=0){clearInterval(iv);cd.style.display='none';chatCooldown=false;}},1000);}}
-async function deleteChatGeralMsg(id){if(currentUser.role!=='admin'){toast('Só admin!','error');return;}if(!confirm('Deletar?'))return;await sb.from('chat_geral').delete().eq('id',id);await renderChatGeral();await updateStats();toast('Deletada!');}
-async function renderChatGeral(){const c=document.getElementById('chatGeralMessages');const msgs=await getChatGeral();if(!msgs.length){c.innerHTML='<div class="chat-empty">💬 Nenhuma mensagem ainda</div>';return;}c.innerHTML=msgs.map(m=>{const isSelf=m.user===currentUser?.username;const del=currentUser?.role==='admin'?`<button class="btn-danger btn-xs" onclick="deleteChatGeralMsg(${m.id})"><i class="fas fa-trash"></i></button>`:'';return`<div class="chat-geral-msg ${isSelf?'self':'other'}"><div class="msg-user ${m.role==='admin'?'admin':''}">${isSelf?'Você':esc(m.user)} ${m.role==='admin'?'👑':''}</div><div>${esc(m.text)}</div><div class="msg-actions"><span class="msg-time">${m.time}</span>${del}</div></div>`;}).join('');c.scrollTop=c.scrollHeight;}
-let chatOpen=false;
-function toggleChat(){chatOpen=!chatOpen;document.getElementById('chatWidget').classList.toggle('open',chatOpen);if(chatOpen){document.getElementById('chatBadge').style.display='none';renderChatMessages();setTimeout(()=>{const m=document.getElementById('chatMessages');m.scrollTop=m.scrollHeight;},100);}}
-async function sendChatMsg(){const input=document.getElementById('chatInput');const text=input.value.trim();if(!text)return;await sb.from('chat_admin').insert({user:currentUser.username,text,time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})});input.value='';if(chatOpen){await renderChatMessages();const m=document.getElementById('chatMessages');setTimeout(()=>{m.scrollTop=m.scrollHeight;},50);}else updateChatBadge();}
-async function renderChatMessages(){const c=document.getElementById('chatMessages');const msgs=await getChatMessages();if(!msgs.length){c.innerHTML='<div class="chat-empty">💬 Vazio</div>';return;}c.innerHTML=msgs.map(m=>{const isSelf=m.user===currentUser?.username;return`<div class="chat-msg ${isSelf?'self':'other'}"><div class="msg-user">${isSelf?'Você':esc(m.user)}</div><div>${esc(m.text)}</div><div class="msg-time">${m.time}</div></div>`;}).join('');}
-function updateChatBadge(){const b=document.getElementById('chatBadge');const msgs=JSON.parse(localStorage.getItem('rimuro_chat')||'[]');b.textContent=msgs.length;b.style.display=msgs.length>0?'flex':'none';}
-carregarDados();
-// Sessão automática
-(async function(){const saved=localStorage.getItem('rimuro_session');if(saved){await carregarDados();const user=users.find(u=>u.username===saved);if(user&&!user.banned){currentUser=user;currentUser.ip='127.0.0.1';enterApp();}}})();
+function saveContentItem(type){const pm={metodos:'met',paineis:'pain',tutoriais:'tut'};const p=pm[type];const titulo=document.getElementById(p+'Titulo').value.trim(),desc=document.getElementById(p+'Desc').value.trim(),link=document.getElementById(p+'Link').value.trim(),img=document.getElementById(p+'Img').value.trim();if(!titulo||!desc){toast('Preencha título e descrição!','error');return;}let items=JSON.parse(localStorage.getItem('rimuro_'+type)||'[]');if(editingContent.type===type&&editingContent.id){const idx=items.findIndex(i=>i.id===editingContent.id);if(idx!==-1)items[idx]={...items[idx],titulo,desc,link,img};editingContent={type:null,id:null};document.querySelector('#'+type+'Form button').textContent='Adicionar';toast('Atualizado! ✅');}else{items.push({id:Date.now(),titulo,desc,link,img,createdBy:currentUser.username});toast('Adicionado! ✅');}localStorage.setItem('rimuro_'+type,JSON.stringify(items));renderContentList(type);renderUserContent(type);updateStats();document.getElementById(p+'Titulo').value='';document.getElementById(p+'Desc').value='';document.getElementById(p+'Link').value='';document.getElementById(p+'Img').value='';}
+function editContentItem(type,id){const items=JSON.parse(localStorage.getItem('rimuro_'+type)||'[]');const item=items.find(i=>i.id===id);if(!item)return;const pm={metodos:'met',paineis:'pain',tutoriais:'tut'};const p=pm[type];document.getElementById(p+'Titulo').value=item.titulo;document.getElementById(p+'Desc').value=item.desc;document.getElementById(p+'Link').value=item.link||'';document.getElementById(p+'Img').value=item.img||'';editingContent={type,id};document.querySelector('#'+type+'Form button').textContent='✏️ Salvar';}
+function deleteContentItem(type,id){if(!confirm('Deletar?'))return;let items=JSON.parse(localStorage.getItem('rimuro_'+type)||'[]');items=items.filter(i=>i.id!==id);localStorage.setItem('rimuro_'+type,JSON.stringify(items));renderContentList(type);renderUserContent(type);updateStats();if(editingContent.type===type&&editingContent.id===id){editingContent={type:null,id:null};document.querySelector('#'+type+'Form button').textContent='Adicionar';}toast('Removido!');}
+function renderContentList(type){const items=JSON.parse(localStorage.getItem('rimuro_'+type)||'[]');const c=document.getElementById(type+'List');if(!items.length){c.innerHTML='<p style="color:#666;">Nenhum item 👆</p>';return;}c.innerHTML=items.map(i=>`<div class="item-card">${i.img?`<img src="${esc(i.img)}" alt="" onerror="this.style.display='none'" />`:''}<div class="info"><h4>${esc(i.titulo)}</h4><p>${esc(i.desc)}</p>${i.link?`<a href="${esc(i.link)}" target="_blank">🔗 ${esc(i.link)}</a>`:''}<div class="meta">${esc(i.createdBy)}</div><div class="actions" style="margin-top:8px;"><button class="btn-edit btn-sm" onclick="editContentItem('${type}',${i.id})"><i class="fas fa-edit"></i></button><button class="btn-danger btn-sm" onclick="deleteContentItem('${type}',${i.id})"><i class="fas fa-trash"></i></button></div></div></div>`).join('');}
+function renderUserContent(type){const items=JSON.parse(localStorage.getItem('rimuro_'+type)||'[]');const c=document.getElementById(type+'UserView');if(!items.length){c.innerHTML='<div class="content-card"><p style="color:#666;">Nenhum conteúdo 📭</p></div>';return;}c.innerHTML=items.map(i=>`<div class="item-card">${i.img?`<img src="${esc(i.img)}" alt="" onerror="this.style.display='none'" />`:''}<div class="info"><h4>${esc(i.titulo)}</h4><p>${esc(i.desc)}</p>${i.link?`<a href="${esc(i.link)}" target="_blank">🔗 Acessar</a>`:''}</div></div>`).join('');}
+function renderAllContent(){['metodos','paineis','tutoriais'].forEach(t=>{renderContentList(t);renderUserContent(t);});}
+// COFRE
+function addAccount(){const n=document.getElementById('accNome').value.trim(),u=document.getElementById('accUsuario').value.trim(),s=document.getElementById('accSenha').value.trim(),c=document.getElementById('accCookie').value.trim(),a=document.getElementById('accAuth').value.trim();if(!n||!u||!s){toast('Preencha nome, usuário e senha!','error');return;}let accs=JSON.parse(localStorage.getItem('rimuro_accounts')||'[]');accs.push({id:Date.now(),nome:n,usuario:u,senha:s,cookie:c,auth:a,createdBy:currentUser.username});localStorage.setItem('rimuro_accounts',JSON.stringify(accs));renderCofre();updateStats();document.getElementById('accNome').value='';document.getElementById('accUsuario').value='';document.getElementById('accSenha').value='';document.getElementById('accCookie').value='';document.getElementById('accAuth').value='';toast('Conta adicionada! ✅');}
+function deleteAccount(id){if(currentUser.role!=='admin'){toast('Só admin!','error');return;}let accs=JSON.parse(localStorage.getItem('rimuro_accounts')||'[]');accs=accs.filter(a=>a.id!==id);localStorage.setItem('rimuro_accounts',JSON.stringify(accs));renderCofre();renderAdminAccounts();updateStats();toast('Removida!');}
+function renderCofre(){const tb=document.getElementById('cofreTable');const accs=JSON.parse(localStorage.getItem('rimuro_accounts')||'[]');if(currentUser.role==='admin'){document.getElementById('cofreTitle').textContent='📋 Todas (Admin)';if(!accs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>';return;}tb.innerHTML=accs.map(a=>`<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha)}')">📋</button></td><td>${a.cookie?`<span style="color:#16a34a;">✅</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie)}')">Copiar</button>`:'—'}</td><td>${a.auth?`<span style="color:#f59e0b;">🔑</span> <button class="copy-btn" onclick="copyText('${esc(a.auth)}')">Copiar</button>`:'—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');}else{document.getElementById('cofreTitle').textContent='📋 Minhas Contas';const minhas=accs.filter(a=>a.createdBy===currentUser.username);if(!minhas.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Nenhuma sua ainda 🔐</td></tr>';return;}tb.innerHTML=minhas.map(a=>`<tr><td><span class="badge badge-user">você</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha)}')">📋</button></td><td>${a.cookie?`<span style="color:#16a34a;">✅</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie)}')">Copiar</button>`:'—'}</td><td>${a.auth?`<span style="color:#f59e0b;">🔑</span> <button class="copy-btn" onclick="copyText('${esc(a.auth)}')">Copiar</button>`:'—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');}}
+function copyText(txt){navigator.clipboard.writeText(txt).then(()=>toast('Copiado! ✅'));}
+
+// SOCIAL LINKS
+function renderSocialLinks(){const grid=document.getElementById('socialLinksGrid');const links=JSON.parse(localStorage.getItem('rimuro_social')||'[]');if(!links.length){grid.innerHTML='<p style="color:#666;text-align:center;">Nenhum link 📭</p>';return;}grid.innerHTML=links.map(l=>`<div class="social-card"><div class="s-icon"><i class="fas fa-${esc(l.icon||'link')}" style="color:#a855f7;"></i></div><div class="s-name">${esc(l.nome)}</div>${l.desc?`<div class="s-desc">${esc(l.desc)}</div>`:''}<a href="${esc(l.link)}" target="_blank" class="btn-primary" style="display:inline-block;padding:6px 16px;font-size:13px;">Acessar</a>${currentUser?.role==='admin'?`<div class="actions" style="justify-content:center;margin-top:8px;"><button class="btn-edit btn-sm" onclick="editSocialLink(${l.id})"><i class="fas fa-edit"></i></button><button class="btn-danger btn-sm" onclick="deleteSocialLink(${l.id})"><i class="fas fa-trash"></i></button></div>`:''}</div>`).join('');}
+let editingSocial=null;
+function editSocialLink(id){const links=JSON.parse(localStorage.getItem('rimuro_social')||'[]');const item=links.find(l=>l.id===id);if(!item)return;const nome=prompt('Nome:',item.nome);const desc=prompt('Descrição:',item.desc||'');const link=prompt('URL:',item.link);const icon=prompt('Ícone:',item.icon||'link');if(nome&&link){let all=JSON.parse(localStorage.getItem('rimuro_social')||'[]');const idx=all.findIndex(l=>l.id===id);if(idx!==-1){all[idx]={...all[idx],nome,desc,link,icon};localStorage.setItem('rimuro_social',JSON.stringify(all));renderSocialLinks();toast('Atualizado! ✅');}}}
+function deleteSocialLink(id){if(!confirm('Deletar?'))return;let links=JSON.parse(localStorage.getItem('rimuro_social')||'[]');links=links.filter(l=>l.id!==id);localStorage.setItem('rimuro_social',JSON.stringify(links));renderSocialLinks();toast('Removido!');}
+
+// ADMIN
+function renderAdmin(){const tb=document.getElementById('adminTable');const search=(document.getElementById('userSearch').value||'').toLowerCase();const filtered=users.filter(u=>u.username.toLowerCase().includes(search));const accs=JSON.parse(localStorage.getItem('rimuro_accounts')||'[]');tb.innerHTML=filtered.map(u=>{const qtd=accs.filter(a=>a.createdBy===u.username).length;return`<tr style="${u.banned?'opacity:0.5;':''}"><td><strong>${esc(u.username)}</strong></td><td><span class="val-full">${esc(u.password)}</span> <button class="copy-btn" onclick="copyText('${esc(u.password)}')">📋</button></td><td><span class="badge ${u.role==='admin'?'badge-admin':'badge-user'}">${u.role}</span></td><td><span class="badge ${u.banned?'badge-banned':'badge-active'}">${u.banned?'❌ Banido':'✅ Ativo'}</span></td><td>${qtd}</td><td><div class="actions">${u.username!==ADMIN_USER?`${u.banned?`<button class="btn-success btn-sm" onclick="unbanUser('${u.username}')"><i class="fas fa-check"></i></button>`:`<button class="btn-warning btn-sm" onclick="banUser('${u.username}')"><i class="fas fa-ban"></i></button>`}<button class="btn-danger btn-sm" onclick="deleteUser('${u.username}')"><i class="fas fa-trash"></i></button>`:'<span style="color:#888;">—</span>'}</div></td></tr>`;}).join('');if(!filtered.length)tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:#666;padding:32px;">Nenhum 🔍</td></tr>';}
+function renderAdminAccounts(){const tb=document.getElementById('adminAccountsTable');const accs=JSON.parse(localStorage.getItem('rimuro_accounts')||'[]');if(!accs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#666;padding:32px;">Vazio 🔐</td></tr>';return;}tb.innerHTML=accs.map(a=>`<tr><td><span class="badge badge-user">${esc(a.createdBy)}</span></td><td><strong>${esc(a.nome)}</strong></td><td>${esc(a.usuario)}</td><td><span class="val-full">${esc(a.senha)}</span> <button class="copy-btn" onclick="copyText('${esc(a.senha)}')">📋</button></td><td>${a.cookie?`<span style="color:#16a34a;">✅</span> <button class="copy-btn" onclick="copyText('${esc(a.cookie)}')">Copiar</button>`:'—'}</td><td>${a.auth?`<span style="color:#f59e0b;">🔑</span> <button class="copy-btn" onclick="copyText('${esc(a.auth)}')">Copiar</button>`:'—'}</td><td><button class="btn-danger btn-sm" onclick="deleteAccount(${a.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');}
+function banUser(u){users.find(x=>x.username===u).banned=true;localStorage.setItem('rimuro_users',JSON.stringify(users));renderAdmin();toast(`${u} banido!`);}
+function unbanUser(u){users.find(x=>x.username===u).banned=false;localStorage.setItem('rimuro_users',JSON.stringify(users));renderAdmin();toast(`${u} desbanido!`);}
+function deleteUser(u){if(!confirm(`Deletar ${u}?`))return;users=users.filter(x=>x.username!==u);localStorage.setItem('rimuro_users',JSON.stringify(users));renderAdmin();updateStats();toast(`${u} removido!`);}
+function switchAdminTab(tab,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));document.getElementById('admin-'+tab).classList.add('active');}
+
+// BROADCAST
+async function enviarBroadcast(){const msg=document.getElementById('broadcastMsg').value.trim();if(!msg){toast('Digite uma mensagem!','error');return;}const status=document.getElementById('broadcastStatus');status.textContent='⏳ Enviando...';let enviados=0,erros=0;const webhookUsers=users.filter(u=>u.webhook&&u.webhook.startsWith('https://discord.com/api/webhooks/'));for(const user of webhookUsers){try{await fetch(user.webhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:`📢 **Mensagem do Rimuro**\n\n${msg}`})});enviados++;}catch{erros++;}}status.innerHTML=`✅ Enviado para <strong>${enviados}</strong> membro(s)${erros>0?` | ❌ ${erros} erro(s)`:''}`;toast('Broadcast enviado! 📢');}
+
+// ========== HYPERLINK (ATUALIZADO) ==========
+async function identificarLink(){
+  const link=document.getElementById('robloxLinkInput').value.trim();
+  const result=document.getElementById('linkResult');
+  if(!link){result.style.display='block';result.innerHTML='<p style="color:#ef4444;">❌ Cole um link!</p>';return;}
+
+  let tipo='',cor='',linkOficial='';
+  const userMatch=link.match(/users\/(\d+)\/profile/);
+  if(userMatch){tipo='👤 Usuário';cor='#3b82f6';linkOficial=`https*:*//www.roblox.com/users/${userMatch[1]}/profile`;}
+  const groupMatch=link.match(/(?:communities|share\/g)\/(\d+)/);
+  if(groupMatch){tipo='🏢 Grupo';cor='#a855f7';linkOficial=`https*:*//www.roblox.com/communities/${groupMatch[1]}/`;}
+  const psMatch=link.match(/privateServerLinkCode=([a-f0-9]+)/);
+  const gameMatch=link.match(/games\/(\d+)\/([^/?]+)/);
+  if(psMatch){tipo='🔒 Private Server';cor='#f59e0b';const code=psMatch[1];linkOficial=gameMatch?`https*:*//www.roblox.com/games/${gameMatch[1]}/${gameMatch[2]}?privateServerLinkCode=${code}`:`https*:*//www.roblox.com/games/0/Game?privateServerLinkCode=${code}`;}
+
+  result.style.display='block';
+  if(!linkOficial){result.innerHTML='<p style="color:#ef4444;">❌ Link do Roblox não reconhecido</p>';return;}
+
+  result.innerHTML='<p style="color:#888;">⏳ Gerando link curto...</p>';
+
+  const linkReal=linkOficial.replace(/\*:\*/g,'://');
+  let linkCurto=linkReal;
+  try{const resp=await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(linkReal)}`);const txt=await resp.text();if(txt&&!txt.startsWith('Error'))linkCurto=txt;}catch{}
+
+  const resultado=`[${linkOficial}](${linkCurto})`;
+
+  result.innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <span style="font-size:32px;">${tipo.split(' ')[0]}</span>
+      <div>
+        <div style="font-weight:600;font-size:18px;color:${cor};">${tipo}</div>
+        <div style="color:#666;font-size:11px;">Original: ${esc(link)}</div>
+      </div>
+    </div>
+    <div style="padding:12px;background:#0a0a0f;border-radius:8px;border:1px solid #2a2a3a;">
+      <div style="color:#888;font-size:12px;margin-bottom:6px;">📌 Resultado:</div>
+      <div style="background:#1a1a24;padding:10px;border-radius:6px;font-size:12px;word-break:break-all;line-height:1.6;">
+        <span style="color:#16a34a;">[${esc(linkOficial)}]</span><span style="color:#888;">(<a href="${esc(linkCurto)}" target="_blank" style="color:#3b82f6;">${esc(linkCurto)}</a>)</span>
+      </div>
+      <button class="copy-btn" onclick="copyText('[${linkOficial.replace(/'/g,"\\'")}](${linkCurto.replace(/'/g,"\\'")})')" style="margin-top:8px;">📋 Copiar</button>
+    </div>`;
+}
+
+// SOCIAL LINKS (manter)
+function renderSocialLinks(){const grid=document.getElementById('socialLinksGrid');const links=JSON.parse(localStorage.getItem('rimuro_social')||'[]');if(!links.length){grid.innerHTML='<p style="color:#666;text-align:center;">Nenhum link 📭</p>';return;}grid.innerHTML=links.map(l=>`<div class="social-card"><div class="s-icon"><i class="fas fa-${esc(l.icon||'link')}" style="color:#a855f7;"></i></div><div class="s-name">${esc(l.nome)}</div>${l.desc?`<div class="s-desc">${esc(l.desc)}</div>`:''}<a href="${esc(l.link)}" target="_blank" class="btn-primary" style="display:inline-block;padding:6px 16px;font-size:13px;">Acessar</a>${currentUser?.role==='admin'?`<div class="actions" style="justify-content:center;margin-top:8px;"><button class="btn-edit btn-sm" onclick="editSocialLink(${l.id})"><i class="fas fa-edit"></i></button><button class="btn-danger btn-sm" onclick="deleteSocialLink(${l.id})"><i class="fas fa-trash"></i></button></div>`:''}</div>`).join('');}
 </script>
 </body>
 </html>
